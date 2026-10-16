@@ -1,6 +1,7 @@
 # SaWatt
 
-> *Ça watt ? Ça watt !* — a French pun on "ça va ?" ("how's it going?"): with SaWatt, it's going in watts.
+> *Ça watt ? Ça watt !* — French for "Pushing the watts? Pushing the watts!": are you pedalling hard?
+> Yes you are.
 
 **Interval training for indoor cycling, built around one number: your average power on the
 interval you are riding right now.**
