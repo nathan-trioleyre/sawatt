@@ -19,7 +19,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.random.Random
 
-/** Tout tourne en temps virtuel : aucun matériel, aucune attente réelle. */
+/** Everything runs in virtual time: no hardware, no real waiting. */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SimulatedTrainerTest {
 

@@ -1,12 +1,12 @@
-<!-- Titre de la PR au format Conventional Commits, ex. : feat(ble): add FTMS trainer discovery -->
+<!-- PR title in Conventional Commits format, e.g.: feat(ble): add FTMS trainer discovery -->
 
-## Ce qui change
-
-
-## Pourquoi
+## What changes
 
 
-## Comment tester
+## Why
+
+
+## How to test
 
 - [ ] `./gradlew :core:test :app:lintDebug :app:assembleDebug`
 - [ ] 

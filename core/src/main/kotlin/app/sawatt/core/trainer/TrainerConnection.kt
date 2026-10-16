@@ -22,39 +22,39 @@ data class DeviceLink(
 )
 
 /**
- * Point d'accès unique au vélo (ou home trainer) et à la ceinture cardio.
+ * Single access point to the bike (or trainer) and the heart-rate strap.
  *
- * Toute la communication avec les capteurs passe par cette interface : l'implémentation
- * Bluetooth vit dans le module Android, et une implémentation simulée la remplace pour les tests et le
- * mode démo. La logique des séances ne consomme que [bikeSamples] et [heartRates].
+ * All sensor communication goes through this interface: the Bluetooth implementation lives in the
+ * Android module, and a simulated implementation replaces it for tests and the demo mode. Workout
+ * logic only consumes [bikeSamples] and [heartRates].
  */
 interface TrainerConnection {
-    /** Vrai pendant une recherche d'appareils. */
+    /** True while scanning for devices. */
     val scanning: StateFlow<Boolean>
 
-    /** Appareils trouvés par la dernière recherche, du plus proche au plus lointain. */
+    /** Devices found by the last scan, nearest first. */
     val discovered: StateFlow<List<DiscoveredDevice>>
 
-    /** Vélo sélectionné, ou null. */
+    /** Selected bike, or null. */
     val bike: StateFlow<DeviceLink?>
 
-    /** Ceinture cardio sélectionnée, ou null. */
+    /** Selected heart-rate strap, or null. */
     val heartRateSensor: StateFlow<DeviceLink?>
 
-    /** Mesures puissance + cadence du vélo. */
+    /** Power + cadence readings from the bike. */
     val bikeSamples: Flow<BikeSample>
 
-    /** Fréquence cardiaque en battements par minute. */
+    /** Heart rate in beats per minute. */
     val heartRates: Flow<Int>
 
-    /** Faux si le transport sous-jacent (ex. Bluetooth) est désactivé. */
+    /** False when the underlying transport (e.g. Bluetooth) is turned off. */
     fun isEnabled(): Boolean
 
     fun startScan(durationMs: Long = 30_000)
 
     fun stopScan()
 
-    /** [keepScanning] permet de reconnecter un vélo mémorisé sans arrêter la recherche de la ceinture. */
+    /** [keepScanning] lets a remembered bike reconnect without stopping the search for the strap. */
     fun connect(device: DiscoveredDevice, keepScanning: Boolean = false)
 
     fun disconnect(type: DeviceType)

@@ -35,11 +35,11 @@ data class Totals(
 )
 
 /**
- * Agrégation de l'historique par semaine / mois / année.
+ * Week / month / year aggregation of the history.
  *
- * Les semaines ISO sont rattachées à l'année de la semaine ISO (une séance du 30 décembre peut
- * appartenir à la semaine 1 de l'année suivante), et les moyennes sont pondérées par la durée
- * des séances plutôt que de faire la moyenne des moyennes.
+ * ISO weeks are keyed by their ISO week-based year (a workout on 30 December may belong to week 1
+ * of the next year), and averages are weighted by workout duration instead of averaging the
+ * averages.
  */
 object HistoryStats {
     fun totals(records: List<WorkoutRecord>) = Totals(

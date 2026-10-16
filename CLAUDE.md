@@ -1,14 +1,15 @@
-# Instructions pour Claude
+# Instructions for Claude
 
-Les règles du projet sont dans [CONTRIBUTING.md](CONTRIBUTING.md) : lis-les et applique-les à chaque tâche.
+The project rules are in [CONTRIBUTING.md](CONTRIBUTING.md): read them and apply them to every task.
 
-Points qui demandent une attention particulière :
+Points that need particular care:
 
-- **Avant de commencer** : partir de `main` à jour et créer une branche `feat/`, `fix/`, `refactor/`, `docs/` ou `chore/` + sujet en kebab-case. Si la tâche couvre plusieurs sujets, propose de la découper.
-- **Jamais sans accord explicite** : `git push`, merge de PR, création de tag, ou toute action sur le dépôt GitHub distant.
-- **Jamais** : commit sur `main`, force push sur `main`, réécriture de l'historique de `main`.
-- **Avant chaque commit** : `JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew :core:test :app:lintDebug :app:assembleDebug`. Ne committe pas si ça échoue.
-- **Messages de commit** : en anglais, au format Conventional Commits.
-- **Documentation** : en français.
-- **Architecture** : la logique de séance (`core`) ne dépend jamais de la couche Bluetooth. Les tests unitaires n'utilisent jamais de matériel réel.
-- **Aucune mention de « BODY BIKE »** dans le dépôt. Les notes de rétro-ingénierie restent hors du dépôt.
+- **Before starting**: start from an up-to-date `main` and create a `feat/`, `fix/`, `refactor/`, `docs/` or `chore/` branch + kebab-case topic. If the task covers several topics, propose splitting it.
+- **Never without explicit approval**: `git push`, merging a PR, creating a tag, or any action on the remote GitHub repository.
+- **Never**: commit to `main`, force-push to `main`, rewrite `main`'s history.
+- **Before every commit**: `JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64 ./gradlew :core:test :app:lintDebug :app:assembleDebug`. Do not commit if it fails.
+- **Commit messages**: English, Conventional Commits format.
+- **Documentation**: English. The README is a user-facing product page; developer content goes in CONTRIBUTING.md.
+- **Conversation with the maintainer**: French.
+- **Architecture**: workout logic (`core`) never depends on the Bluetooth layer. Unit tests never use real hardware.
+- **No mention of "BODY BIKE"** anywhere in the repository. Reverse-engineering notes stay outside the repository.

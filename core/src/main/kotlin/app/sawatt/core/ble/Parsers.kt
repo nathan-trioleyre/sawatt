@@ -24,10 +24,9 @@ object CyclingPowerParser {
     /**
      * Parses per the Bluetooth CPS spec, using the flags to locate the crank data.
      *
-     * Repli : si les drapeaux n'annoncent pas de données pédalier mais que le paquet fait au moins
-     * 14 octets, on lit les offsets fixes de la disposition « roue + pédalier » (drapeaux 0x0030) :
-     * tours de pédalier en 10..11, horodatage en 12..13. Certains vélos envoient cette disposition
-     * sans positionner correctement les drapeaux.
+     * Fallback: if the flags do not announce crank data but the packet is at least 14 bytes long,
+     * read the fixed offsets of the "wheel + crank" layout (flags 0x0030): crank revolutions at
+     * 10..11, event time at 12..13. Some bikes send this layout without setting the flags.
      */
     fun parse(data: ByteArray): PowerMeasurement? {
         if (data.size < 4) return null
@@ -64,8 +63,8 @@ object HeartRateParser {
 object AdvertisingParser {
     /**
      * Extracts 16-bit service UUIDs (AD types 0x02/0x03) from a raw advertising payload, as
-     * uppercase 4-digit hex strings ("1818", "180D"). Utile sur Android, où les résultats de scan
-     * ne listent pas toujours les UUID de service.
+     * uppercase 4-digit hex strings ("1818", "180D"). Useful on Android, where scan results do not
+     * always list service UUIDs.
      */
     fun serviceUuids16(raw: ByteArray): List<String> {
         val out = mutableListOf<String>()

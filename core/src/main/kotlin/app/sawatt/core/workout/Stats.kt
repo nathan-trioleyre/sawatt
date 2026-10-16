@@ -2,7 +2,7 @@ package app.sawatt.core.workout
 
 import kotlinx.serialization.Serializable
 
-/** Une seconde de pédalage. */
+/** One second of riding. */
 data class Sample(
     val powerW: Int,
     val cadenceRpm: Int,
@@ -30,8 +30,8 @@ data class StatsSummary(
 )
 
 /**
- * Running accumulator. Averages include zeros for power and cadence (les secondes en roue libre
- * comptent); heart rate ignores seconds without a reading.
+ * Running accumulator. Averages include zeros for power and cadence (coasting seconds
+ * count); heart rate ignores seconds without a reading.
  */
 class StatsAccumulator {
     private var count = 0

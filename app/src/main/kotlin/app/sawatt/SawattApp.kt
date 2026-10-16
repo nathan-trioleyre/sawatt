@@ -42,7 +42,7 @@ class AppContainer(context: Context) {
 
     private val simulated = SimulatedTrainer(scope)
 
-    /** Seul point d'accès aux capteurs pour le reste de l'application. */
+    /** The only access point to the sensors for the rest of the app. */
     val trainer: TrainerConnection = SwitchingTrainerConnection(
         scope = scope,
         real = BleManager(context, scope),
@@ -65,7 +65,7 @@ class AppContainer(context: Context) {
                 }
             }
         }
-        // Mode démo : le vélo et la ceinture simulés se connectent d'eux-mêmes.
+        // Demo mode: the simulated bike and heart-rate strap connect by themselves.
         scope.launch {
             settings.app.map { it.simulateBike }.distinctUntilChanged().collect { on ->
                 if (on) {
@@ -74,7 +74,7 @@ class AppContainer(context: Context) {
                 }
             }
         }
-        // Le cycliste virtuel suit la cible de l'intervalle en cours.
+        // The virtual rider follows the current interval's target.
         scope.launch {
             workout.state.collect { simulated.targetPowerW = it.live?.current?.targetPowerW }
         }

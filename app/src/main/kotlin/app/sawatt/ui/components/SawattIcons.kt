@@ -6,10 +6,10 @@ import androidx.compose.ui.res.vectorResource
 import app.sawatt.R
 
 /**
- * Icônes Material absentes du jeu de base, embarquées en drawables vectoriels.
+ * Material icons missing from the core set, bundled as vector drawables.
  *
- * On évite ainsi la bibliothèque `material-icons-extended` (plusieurs milliers d'icônes, 35 Mo) :
- * l'APK de debug passe d'environ 18 à 11 Mo.
+ * This avoids the `material-icons-extended` library (thousands of icons, 35 MB): the debug APK
+ * goes from about 18 to 11 MB.
  */
 object SawattIcons {
     val ArrowDownward: ImageVector @Composable get() = ImageVector.vectorResource(R.drawable.ic_arrow_downward)

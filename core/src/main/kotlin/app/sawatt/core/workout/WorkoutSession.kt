@@ -264,8 +264,8 @@ class WorkoutSession(
 
     /**
      * Readings received during the current second. With no new reading, the previous value is
-     * carried for up to [STALE_TICKS] seconds, then the channel drops to 0. Un vélo
-     * autoalimenté arrête simplement de notifier when the rider stops, so a stale value must not
+     * carried for up to [STALE_TICKS] seconds, then the channel drops to 0. A
+     * self-powered bike simply stops notifying when the rider stops, so a stale value must not
      * keep inflating the averages.
      */
     private class Channel {

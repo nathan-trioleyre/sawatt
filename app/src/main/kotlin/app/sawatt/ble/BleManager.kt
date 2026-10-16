@@ -39,10 +39,10 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 /**
- * Client BLE pour un vélo à capteur de puissance (service Cycling Power) et une ceinture cardio.
+ * BLE client for a bike with a power sensor (Cycling Power service) and a heart-rate strap.
  *
- * Scanne tout et garde les appareils qui annoncent 0x1818 ou 0x180D, s'abonne à 0x2A63 / 0x2A37
- * et lit la version du firmware (0x2A26). N'écrit jamais sur le vélo.
+ * Scans everything and keeps devices advertising 0x1818 or 0x180D, subscribes to 0x2A63 / 0x2A37
+ * and reads the firmware revision (0x2A26). Never writes to the bike.
  *
  * The bike is powered by pedalling and disappears when the rider stops, so an unexpected
  * disconnect is followed by a background `autoConnect` that resumes as soon as it advertises again.
@@ -94,7 +94,7 @@ class BleManager(private val context: Context, private val scope: CoroutineScope
         _discovered.update { list -> list.filter { it.address in connected } }
         try {
             val settings = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
-            // Pas de filtre matériel : certains téléphones do not match service UUID
+            // No hardware filter: some phones do not match service UUID
             // filters reliably, so every result is inspected in software.
             scanner.startScan(null, settings, scanCallback)
             _scanning.value = true

@@ -1,6 +1,6 @@
 version: 2
 updates:
-  # Tient à jour les actions épinglées par SHA dans les workflows.
+  # Keeps the SHA-pinned actions in the workflows up to date.
   - package-ecosystem: github-actions
     directory: /
     schedule:

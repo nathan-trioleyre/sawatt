@@ -7,7 +7,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.LocalDate
 
-/** Valeurs de référence calculées indépendamment (Node) à partir des mêmes formules. */
+/** Reference values computed independently (Node) from the same formulas. */
 class RideMathTest {
     private val today = LocalDate.of(2026, 10, 16)
 
