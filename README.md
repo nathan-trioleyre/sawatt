@@ -30,6 +30,10 @@ block, whether you are on target.
 - Press **Lap** at any time to start a new interval with its own averages: perfect for climbs,
   sprints or unplanned efforts.
 
+### Send your workouts anywhere
+- Export any workout as a **FIT** or **TCX** file, with one lap per interval, and share it to
+  Strava, Garmin Connect, intervals.icu, TrainingPeaks, a drive or an email.
+
 ### Follow your progress
 - Every workout keeps its interval table, a power chart with your targets and the time spent in
   each power zone.
@@ -93,7 +97,7 @@ attached to each pull request's CI run, or build it yourself: see
 
 - Targets as a percentage of FTP, in addition to watts.
 - French interface.
-- Workout export (TCX/FIT) and Strava upload.
+- Direct upload to Strava.
 - Data backup and restore.
 - FTP test, VO2max test, levels and weekly challenges.
 
