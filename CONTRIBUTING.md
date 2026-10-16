@@ -81,6 +81,20 @@ refactor(core)!: rename StatsSummary fields
 - La CI doit passer avant le merge.
 - Le merge se fait en **squash** par défaut.
 
+## Intégration continue
+
+Le workflow `.github/workflows/ci.yml` tourne sur chaque PR et sur `main` :
+
+| Job | Rôle |
+|---|---|
+| `changes` | Détecte si la PR ne touche que de la documentation (`*.md`, `docs/`) : les jobs suivants sont alors sautés. |
+| `unit tests` | `./gradlew :core:test` |
+| `lint and build` | `./gradlew :app:lintDebug :app:assembleDebug`. Sur une PR, l'APK de debug est joint au run (artefact `sawatt-debug-apk`, 14 jours) pour l'installer sur un téléphone. |
+| `ci` | Synthèse : c'est la **seule vérification exigée** par la protection de `main`. Elle échoue si un job a échoué. |
+
+- Le cache Gradle (dépendances et cache de build) n'est écrit que par les runs sur `main`. Les PR le lisent : seules les parties modifiées sont recompilées.
+- Les actions sont épinglées par SHA de commit. Dependabot propose chaque mois leur mise à jour.
+
 ## Versions et releases
 
 - Versionnage sémantique : `vMAJOR.MINOR.PATCH`.
