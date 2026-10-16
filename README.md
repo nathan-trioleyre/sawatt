@@ -1,128 +1,107 @@
 # Sawatt
 
-> *Ça watt ? Ça watt !*
+> *Ça watt ? Ça watt !* — a French pun on "ça va ?" ("how's it going?"): with Sawatt, it's going in watts.
 
-Application Android (Kotlin + Jetpack Compose) d'entraînement par intervalles pour vélos d'intérieur
-connectés et capteurs de puissance Bluetooth.
+**Interval training for indoor cycling, built around one number: your average power on the
+interval you are riding right now.**
 
-L'idée de départ : pendant une séance, connaître sa **puissance moyenne sur l'intervalle en cours**,
-et pas seulement la puissance instantanée ou la moyenne de toute la séance. On peut ainsi suivre une
-séance comme `3 × 15'` et voir sa moyenne pour chaque bloc.
+Most indoor bike apps show either your instantaneous watts, which jump around with every pedal
+stroke, or the average of the whole session, which tells you nothing about the effort you are in.
+Sawatt shows what you actually need during intervals: **the average power since the current
+interval started**, colour-coded against your target. Ride `3 × 15' @ 250 W` and you know, block by
+block, whether you are on target.
 
-## Fonctionnalités
+## What you can do with Sawatt
 
-- **Connexion vélo + cardiofréquencemètre** en Bluetooth standard :
-  - service Cycling Power `0x1818/0x2A63` pour le vélo ou le capteur de puissance ;
-  - service Heart Rate `0x180D/0x2A37` pour la ceinture ;
-  - mémorise les appareils et se reconnecte automatiquement quand le vélo se réveille ;
-  - lecture seule : Sawatt n'écrit jamais sur le vélo.
-- **Séances structurées** :
-  - blocs avec une durée, une puissance cible et une cadence cible facultative ;
-  - séries répétées, par ex. `10' d'échauffement → 3 × [15' à 250 W + 5' de récupération] → 10' de retour au calme` ;
-  - cet exemple est préinstallé ;
-  - pendant la séance : cible en cours, temps restant, progression, bloc suivant, et un bip à chaque transition.
-- **Statistiques par intervalle** :
-  - puissance moyenne en direct depuis le début de l'intervalle, colorée selon la cible ;
-  - puissance max, cadence moyenne et fréquence cardiaque moyenne de l'intervalle ;
-  - en fin de séance, un tableau avec une ligne par intervalle, enregistré dans l'historique.
-- **Bouton Tour (Lap)** :
-  - en sortie libre, il démarre un nouvel intervalle ;
-  - dans une séance structurée, il passe au bloc suivant ; le bloc écourté est marqué d'un `*`.
-- **Historique** :
-  - pour chaque séance : tableau des intervalles, courbe de puissance avec les cibles, temps passé par zone de puissance ;
-  - synthèses par semaine / mois / année.
-- **Profil** : FTP et FC max, saisies ou estimées ; unités métriques ou impériales.
-- **Réglages** : bip de transition, écran toujours allumé, vélo simulé (mode démo).
+### Ride structured workouts
+- Build your own sessions from blocks: duration, target power and, if you want, target cadence.
+- Repeat sets in one tap: `10' warm-up → 3 × [15' @ 250 W + 5' recovery] → 10' cool-down`.
+- During the ride, see the current target, the time left in the interval, a progress bar and what
+  comes next.
+- A beep marks every transition, so you can keep your eyes off the screen.
 
-## Organisation du projet
+### Know exactly how each interval went
+- Live **interval average power**, green when you are on target, blue below, red above.
+- Max power, average cadence and average heart rate for the interval.
+- At the end, a summary table with **one row per interval**, saved in your history.
 
-```
-core/   Kotlin/JVM pur, testé unitairement
-        ble/       parseurs Cycling Power / Heart Rate / advertising, calcul de cadence
-        trainer/   interface TrainerConnection + SimulatedTrainer (home trainer simulé)
-        ride/      vitesse virtuelle, kcal, estimations FTP et FC max, zones
-        workout/   WorkoutPlan, WorkoutSession (moteur d'intervalles), statistiques
-        history/   agrégation semaine/mois/année, configuration JSON
-app/    Application Android
-        ble/       BleManager (TrainerConnection en Bluetooth), SwitchingTrainerConnection
-                   (bascule réel / simulé selon le réglage « vélo simulé »)
-        workout/   WorkoutController (horloge 1 Hz, bips, sauvegarde), WorkoutService (premier plan)
-        data/      dépôts en fichiers JSON (profil, réglages, séances, historique)
-        ui/        écrans Compose
-```
+### Split a free ride whenever you want
+- Press **Lap** at any time to start a new interval with its own averages: perfect for climbs,
+  sprints or unplanned efforts.
 
-### Fonctionnement
+### Follow your progress
+- Every workout keeps its interval table, a power chart with your targets and the time spent in
+  each power zone.
+- Weekly, monthly and yearly summaries: time, distance, calories, average and max power.
 
-```
-Vélo ──BLE──► TrainerConnection ──► WorkoutController ──► WorkoutSession ──► Écrans
-Ceinture ─BLE─┘ (BleManager ou    (horloge 1 Hz,       (moteur            (Compose)
-                 SimulatedTrainer)  bips, sauvegarde)    d'intervalles)
-                                                               │
-                                                               ▼
-                                               HistoryRepository (fichiers JSON)
-```
+### Train on your numbers
+- Enter your FTP and max heart rate, or let Sawatt estimate them from your profile.
+- Metric or imperial units.
 
-- Toute la communication avec les capteurs passe par l'interface `TrainerConnection` (module
-  `core`). `BleManager` l'implémente en Bluetooth, `SimulatedTrainer` sans matériel : les tests
-  unitaires et le mode démo utilisent ce dernier.
-- Le vélo envoie environ deux mesures par seconde : la puissance, et un compteur de tours de
-  pédalier horodaté. La cadence est déduite de ce compteur : `60 × Δtours × 1024 / Δtemps`.
-- Le moteur (`WorkoutSession`) ne dépend d'aucune horloge. `tick()` est appelé une fois par seconde
-  de pédalage. À chaque appel, il :
-  - fait la moyenne des mesures reçues pendant la seconde et en tire un échantillon ;
-  - ajoute cet échantillon à la séance et à l'intervalle en cours ;
-  - fait avancer le plan.
-- La pause arrête l'horloge. Sans données depuis 3 s, la puissance retombe à 0 W.
-- En fin de séance, le résumé et les statistiques par intervalle sont enregistrés dans
-  `history/index.json`, et la trace seconde par seconde dans `history/<id>.samples.json`.
+### Private by design
+- No account, no ads, no tracking.
+- Sawatt does not even request internet access: your workouts stay on your phone.
 
-## Compilation
+## Compatibility
 
-Il faut un JDK 17 ou 21 (Gradle 8.14 ne fonctionne pas avec le JDK 25) et le SDK Android (plateforme 36).
-Le fichier `local.properties` (non versionné) indique l'emplacement du SDK, par ex.
-`sdk.dir=/home/<vous>/Android/Sdk`.
+### Bikes, trainers and power meters
+Sawatt works with any device that broadcasts power over the standard **Bluetooth Cycling Power
+service**. That includes:
 
-```sh
-export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
-./gradlew :core:test            # tests unitaires (protocole, formules, moteur d'intervalles, historique)
-./gradlew :app:assembleDebug    # app/build/outputs/apk/debug/app-debug.apk
-adb install -r app/build/outputs/apk/debug/app-debug.apk
-```
+- **indoor and spin bikes with Bluetooth power output**, including self-powered bikes that wake up
+  when you start pedalling (Sawatt reconnects automatically);
+- **smart trainers**: most of them broadcast the Cycling Power service alongside their trainer
+  protocol;
+- **Bluetooth power meters**: pedals, cranks and spiders.
 
-Identifiant de l'application : `app.sawatt`.
+Cadence comes from the same device when it reports crank revolutions (most power meters and many
+bikes do; some smart trainers do not).
 
-## État du projet
+### Heart-rate monitors
+Any chest strap or armband using the standard **Bluetooth Heart Rate service**, which covers the
+vast majority of Bluetooth heart-rate monitors.
 
-### Fait
+### Phones
+- Android 8.0 or later with Bluetooth Low Energy.
+- Tested on a Google Pixel 9a (Android 17).
 
-- Module `core` : parseurs BLE, calcul de cadence, formules, moteur de séance par intervalles,
-  agrégation de l'historique, home trainer simulé. 25 tests unitaires, qui passent, sans aucun matériel.
-- Application Android :
-  - connexion vélo / ceinture ;
-  - sortie libre avec Tour ;
-  - séances structurées (éditeur + exécution) ;
-  - statistiques par intervalle et tableau de fin de séance ;
-  - historique avec courbe et synthèses ;
-  - profil, réglages, vélo simulé ;
-  - service de premier plan.
-- Compilation et lint Android sans erreur ni avertissement.
+### Not supported yet
+- **ANT+** sensors: Bluetooth only for now.
+- **Trainer resistance control (ERG mode)** and trainers that only expose the FTMS protocol: Sawatt
+  reads power from the Cycling Power service and does not set the resistance.
+- **Speed/cadence-only sensors** without power measurement.
+- Bikes that only talk to their own app through a proprietary protocol.
+- iPhone.
 
-### Reste à faire
+Not sure about your device? Look for "Bluetooth Cycling Power", "BLE power" or "CPS" in its
+specifications. A trainer that only advertises the trainer control protocol (FTMS) is not
+supported yet.
 
-**À vérifier en priorité (rien n'a encore tourné sur un vrai appareil) :**
-- Tester sur un téléphone, d'abord avec le vélo simulé, puis avec un vrai vélo.
-- Sur le vélo, vérifier :
-  - la disposition réelle des paquets `0x2A63` ;
-  - la cadence par rapport à la console ;
-  - la reconnexion quand on arrête puis reprend le pédalage ;
-  - le fonctionnement écran verrouillé sur une longue séance.
-- Tester avec d'autres capteurs de puissance et home-trainers Bluetooth.
+## Try it without a bike
 
-**Améliorations probables :**
-- Bips de compte à rebours (3-2-1) avant chaque transition.
-- Cibles en % de FTP en plus des watts.
-- Interface en français (elle est en anglais pour l'instant).
-- Export des séances (TCX/FIT), sauvegarde/restauration des données.
-- Identité visuelle : icône et couleurs Sawatt définitives.
+Turn on **Settings → Simulated bike**: a virtual rider and heart-rate strap connect instantly and
+follow your workout's targets. It is the quickest way to discover the app.
 
-**Plus tard :** test FTP, test VO2max, niveaux/médailles, envoi vers Strava (écrans « À venir »).
+## Getting the app
+
+Sawatt is not on the Play Store yet. In the meantime you can install a test build (debug APK)
+attached to each pull request's CI run, or build it yourself: see
+[CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Roadmap
+
+- Countdown beeps (3-2-1) before each transition.
+- Targets as a percentage of FTP, in addition to watts.
+- French interface.
+- Workout export (TCX/FIT) and Strava upload.
+- Data backup and restore.
+- FTP test, VO2max test, levels and weekly challenges.
+
+## Contributing
+
+Sawatt is developed in the open. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup,
+how the app works under the hood, and the workflow rules.
+
+## License
+
+No license has been chosen yet: until then, all rights are reserved.
