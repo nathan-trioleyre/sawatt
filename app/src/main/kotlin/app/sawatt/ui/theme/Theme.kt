@@ -5,7 +5,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-/** Sawatt palette: orange-red accent and the five power zone colours. */
+/** SaWatt palette: orange-red accent and the five power zone colours. */
 object SawattColors {
     val Accent = Color(0xFFE5684A)
     val AccentDark = Color(0xFFCE3B17)
