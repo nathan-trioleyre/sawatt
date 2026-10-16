@@ -24,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import app.sawatt.AppContainer
+import app.sawatt.core.ride.RideMath
 import app.sawatt.core.workout.Block
 import app.sawatt.core.workout.PlanStep
 import app.sawatt.core.workout.RepeatSet
@@ -59,6 +61,7 @@ import app.sawatt.ui.formatDuration
 import app.sawatt.ui.parseDuration
 import app.sawatt.workout.WorkoutStatus
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.math.roundToInt
 
 @Composable
 fun PlansScreen(container: AppContainer, nav: NavController) {
@@ -111,7 +114,7 @@ fun PlansScreen(container: AppContainer, nav: NavController) {
 }
 
 private fun describe(plan: WorkoutPlan): String {
-    fun b(x: Block) = "${formatDuration(x.durationSec)} @ ${x.targetPowerW} W"
+    fun b(x: Block) = "${formatDuration(x.durationSec)} @ ${x.targetLabel()}"
     val steps = plan.steps.joinToString(" → ") { s ->
         when (s) {
             is Block -> b(s)
@@ -126,22 +129,38 @@ private fun describe(plan: WorkoutPlan): String {
 private val ids = AtomicLong()
 
 /** Mutable editor model; text fields keep the raw input so partial values are possible. */
-private class EditBlock(name: String, duration: String, power: String, cadence: String) {
+private class EditBlock(name: String, duration: String, power: String, cadence: String, percent: Boolean = false) {
     val id = ids.incrementAndGet()
     var name by mutableStateOf(name)
     var duration by mutableStateOf(duration)
     var power by mutableStateOf(power)
     var cadence by mutableStateOf(cadence)
 
+    /** True when [power] is a percentage of FTP rather than watts. */
+    var percent by mutableStateOf(percent)
+
+    val powerValue: Int? get() = power.trim().toIntOrNull()?.takeIf { it in if (percent) PERCENT_RANGE else WATTS_RANGE }
+
     fun toBlock(): Block? {
         val d = parseDuration(duration) ?: return null
-        val p = power.trim().toIntOrNull()?.takeIf { it in 0..2000 } ?: return null
+        val p = powerValue ?: return null
         val c = cadence.trim().takeIf { it.isNotEmpty() }?.let { it.toIntOrNull()?.takeIf { v -> v in 1..200 } ?: return null }
-        return Block(name.trim().ifEmpty { "Interval" }, d, p, c)
+        val n = name.trim().ifEmpty { "Interval" }
+        return if (percent) Block(n, d, targetCadenceRpm = c, targetFtpPercent = p) else Block(n, d, p, c)
     }
 
     companion object {
-        fun from(b: Block) = EditBlock(b.name, formatDuration(b.durationSec), b.targetPowerW.toString(), b.targetCadenceRpm?.toString() ?: "")
+        val WATTS_RANGE = 0..2000
+        val PERCENT_RANGE = 1..300
+
+        fun from(b: Block) = EditBlock(
+            b.name,
+            formatDuration(b.durationSec),
+            (b.targetFtpPercent ?: b.targetPowerW).toString(),
+            b.targetCadenceRpm?.toString() ?: "",
+            percent = b.targetFtpPercent != null,
+        )
+
         fun blank(name: String = "Interval") = EditBlock(name, "5:00", "150", "")
     }
 }
@@ -162,6 +181,8 @@ private fun PlanStep.toEdit(): EditStep = when (this) {
 
 @Composable
 fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Unit) {
+    val profile by container.settings.profile.collectAsStateWithLifecycle()
+    val ftpW = RideMath.effectiveFtp(profile)
     val original = remember(planId) { planId?.let(container.plans::get) }
     var name by remember { mutableStateOf(original?.name ?: "New workout") }
     val steps = remember {
@@ -220,6 +241,7 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
                 key(step.id) {
                     StepEditor(
                         step = step,
+                        ftpW = ftpW,
                         onMoveUp = { if (index > 0) steps.add(index - 1, steps.removeAt(index)) },
                         onMoveDown = { if (index < steps.lastIndex) steps.add(index + 1, steps.removeAt(index)) },
                         onRemove = { steps.removeAt(index) },
@@ -254,7 +276,7 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
 }
 
 @Composable
-private fun StepEditor(step: EditStep, onMoveUp: () -> Unit, onMoveDown: () -> Unit, onRemove: () -> Unit) {
+private fun StepEditor(step: EditStep, ftpW: Double, onMoveUp: () -> Unit, onMoveDown: () -> Unit, onRemove: () -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
         Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -279,12 +301,12 @@ private fun StepEditor(step: EditStep, onMoveUp: () -> Unit, onMoveDown: () -> U
                 IconButton(onClick = onRemove) { Icon(Icons.Default.Delete, "Remove") }
             }
             when (step) {
-                is EditStep.Single -> BlockFields(step.block)
+                is EditStep.Single -> BlockFields(step.block, ftpW)
                 is EditStep.Repeat -> {
                     step.blocks.forEachIndexed { i, b ->
                         key(b.id) {
                             Row(verticalAlignment = Alignment.Top) {
-                                Column(Modifier.weight(1f)) { BlockFields(b) }
+                                Column(Modifier.weight(1f)) { BlockFields(b, ftpW) }
                                 IconButton(onClick = { step.blocks.removeAt(i) }) { Icon(Icons.Default.Close, "Remove block") }
                             }
                         }
@@ -300,7 +322,7 @@ private fun StepEditor(step: EditStep, onMoveUp: () -> Unit, onMoveDown: () -> U
 }
 
 @Composable
-private fun BlockFields(b: EditBlock) {
+private fun BlockFields(b: EditBlock, ftpW: Double) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         OutlinedTextField(b.name, { b.name = it }, label = { Text("Name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -313,9 +335,9 @@ private fun BlockFields(b: EditBlock) {
             )
             OutlinedTextField(
                 b.power, { b.power = it },
-                label = { Text("Power W") },
+                label = { Text(if (b.percent) "% FTP" else "Power W") },
                 singleLine = true,
-                isError = b.power.trim().toIntOrNull()?.let { it in 0..2000 } != true,
+                isError = b.powerValue == null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(1f),
             )
@@ -328,6 +350,22 @@ private fun BlockFields(b: EditBlock) {
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.weight(0.9f),
             )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            FilterChip(
+                selected = b.percent,
+                onClick = { b.percent = !b.percent },
+                label = { Text("% of FTP") },
+            )
+            val pct = b.powerValue
+            if (b.percent && pct != null) {
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    "≈ ${(ftpW * pct / 100).roundToInt()} W with your FTP of ${ftpW.roundToInt()} W",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

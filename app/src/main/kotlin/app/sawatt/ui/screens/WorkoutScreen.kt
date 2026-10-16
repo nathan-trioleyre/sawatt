@@ -45,6 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sawatt.AppContainer
 import app.sawatt.core.trainer.LinkState
 import app.sawatt.core.model.UnitSystem
+import app.sawatt.core.ride.RideMath
 import app.sawatt.core.workout.CurrentInterval
 import app.sawatt.core.workout.IntervalKind
 import app.sawatt.core.workout.LiveState
@@ -116,7 +117,7 @@ fun WorkoutScreen(
         ) {
             val live = state.live
             if (live == null) {
-                Idle(plan, readings, bikeOk, onDevices)
+                Idle(plan, RideMath.effectiveFtp(profile), readings, bikeOk, onDevices)
             } else {
                 Live(live, readings, state.status, profile.units)
             }
@@ -141,7 +142,7 @@ fun WorkoutScreen(
 }
 
 @Composable
-private fun Idle(plan: WorkoutPlan?, readings: SensorReadings, bikeOk: Boolean, onDevices: () -> Unit) {
+private fun Idle(plan: WorkoutPlan?, ftpW: Double, readings: SensorReadings, bikeOk: Boolean, onDevices: () -> Unit) {
     if (!bikeOk) {
         SectionCard {
             Text("No bike connected", style = MaterialTheme.typography.titleMedium)
@@ -165,7 +166,7 @@ private fun Idle(plan: WorkoutPlan?, readings: SensorReadings, bikeOk: Boolean, 
             Text("${plan.name} · ${formatDuration(plan.totalDurationSec)}", style = MaterialTheme.typography.titleMedium)
             plan.flatten().forEach { p ->
                 val cadence = p.block.targetCadenceRpm?.let { " · $it rpm" } ?: ""
-                Text("${p.label} — ${formatDuration(p.block.durationSec)} @ ${p.block.targetPowerW} W$cadence", style = MaterialTheme.typography.bodySmall)
+                Text("${p.label} — ${formatDuration(p.block.durationSec)} @ ${p.block.targetLabel(ftpW)}$cadence", style = MaterialTheme.typography.bodySmall)
             }
         }
     } else {
@@ -244,7 +245,8 @@ private fun CurrentIntervalCard(c: CurrentInterval, live: LiveState, status: Wor
                 Text(c.name, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                 if (c.targetPowerW != null) {
                     val cadence = c.targetCadenceRpm?.let { " · $it rpm" } ?: ""
-                    Text("Target ${c.targetPowerW} W$cadence", style = MaterialTheme.typography.titleMedium, color = SawattColors.Zones[3])
+                    val percent = c.targetFtpPercent?.let { " ($it% FTP)" } ?: ""
+                    Text("Target ${c.targetPowerW} W$percent$cadence", style = MaterialTheme.typography.titleMedium, color = SawattColors.Zones[3])
                 }
             }
             Column(horizontalAlignment = Alignment.End) {
@@ -262,7 +264,7 @@ private fun CurrentIntervalCard(c: CurrentInterval, live: LiveState, status: Wor
         }
         live.next?.let { n ->
             Text(
-                "Next: ${n.label} · ${formatDuration(n.block.durationSec)} @ ${n.block.targetPowerW} W",
+                "Next: ${n.label} · ${formatDuration(n.block.durationSec)} @ ${n.block.targetLabel(live.ftpW)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

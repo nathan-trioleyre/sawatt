@@ -29,7 +29,7 @@ private val columns = listOf(
     Column("#", 28.dp),
     Column("Interval", 110.dp, alignEnd = false),
     Column("Time", 58.dp),
-    Column("Target", 74.dp),
+    Column("Target", 108.dp),
     Column("Avg W", 56.dp),
     Column("Max W", 56.dp),
     Column("Avg rpm", 62.dp),
@@ -47,6 +47,7 @@ fun IntervalTable(intervals: List<IntervalRecord>, modifier: Modifier = Modifier
             val s = iv.stats
             val target = buildString {
                 iv.targetPowerW?.let { append("$it W") }
+                iv.targetFtpPercent?.let { append(" ($it%)") }
                 iv.targetCadenceRpm?.let { append(" @$it") }
             }.ifEmpty { "–" }
             val time = formatDuration(s.durationSec) + if (iv.endedEarly) "*" else ""

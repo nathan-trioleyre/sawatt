@@ -3,20 +3,44 @@ package app.sawatt.core.workout
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.util.UUID
+import kotlin.math.roundToInt
 
 /** One step of a structured workout. */
 @Serializable
 sealed interface PlanStep
 
-/** A single interval: hold [targetPowerW] (and optionally [targetCadenceRpm]) for [durationSec]. */
+/**
+ * A single interval held for [durationSec], optionally at [targetCadenceRpm].
+ *
+ * The power target is either absolute ([targetPowerW]) or relative to the rider's FTP
+ * ([targetFtpPercent]); exactly one of them is set. A percentage is converted to watts with the
+ * rider's FTP when the workout starts, so a plan keeps working as the FTP improves.
+ */
 @Serializable
 @SerialName("block")
 data class Block(
     val name: String,
     val durationSec: Int,
-    val targetPowerW: Int,
+    val targetPowerW: Int? = null,
     val targetCadenceRpm: Int? = null,
-) : PlanStep
+    val targetFtpPercent: Int? = null,
+) : PlanStep {
+    init {
+        require((targetPowerW == null) != (targetFtpPercent == null)) {
+            "A block needs exactly one power target: watts or % of FTP"
+        }
+    }
+
+    /** Target power in watts for a rider with the given FTP. */
+    fun targetWatts(ftpW: Double): Int = targetPowerW ?: (ftpW * targetFtpPercent!! / 100).roundToInt()
+
+    /** "250 W", or "75% FTP" ("75% FTP (188 W)" when [ftpW] is known). */
+    fun targetLabel(ftpW: Double? = null): String = when {
+        targetPowerW != null -> "$targetPowerW W"
+        ftpW == null -> "$targetFtpPercent% FTP"
+        else -> "$targetFtpPercent% FTP (${targetWatts(ftpW)} W)"
+    }
+}
 
 /** [blocks] played in order, [times] times (e.g. 3 × [15' @ 250 W + 5' recovery]). */
 @Serializable

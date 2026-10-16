@@ -22,6 +22,8 @@ data class IntervalRecord(
     val startOffsetSec: Int,
     val targetPowerW: Int? = null,
     val targetCadenceRpm: Int? = null,
+    /** Set when the target was defined as a percentage of FTP; [targetPowerW] holds the watts. */
+    val targetFtpPercent: Int? = null,
     val plannedDurationSec: Int? = null,
     /** True when a planned block was cut short with the Lap button or by finishing the workout. */
     val endedEarly: Boolean = false,
@@ -37,6 +39,7 @@ data class CurrentInterval(
     val plannedDurationSec: Int?,
     val targetPowerW: Int?,
     val targetCadenceRpm: Int?,
+    val targetFtpPercent: Int?,
     val stats: StatsSummary,
 ) {
     val remainingSec: Int? get() = plannedDurationSec?.let { (it - elapsedSec).coerceAtLeast(0) }
@@ -53,6 +56,8 @@ data class LiveState(
     val completed: List<IntervalRecord>,
     val plannedCount: Int,
     val planFinished: Boolean,
+    /** FTP used to turn "% of FTP" targets into watts for this session. */
+    val ftpW: Double,
 )
 
 sealed interface SessionEvent {
@@ -208,6 +213,7 @@ class WorkoutSession(
         completed = completed.toList(),
         plannedCount = planned.size,
         planFinished = planFinished,
+        ftpW = ftpW,
     )
 
     // ---- internals ----------------------------------------------------------------------
@@ -241,8 +247,9 @@ class WorkoutSession(
             name = open.name,
             kind = open.kind,
             startOffsetSec = open.startOffsetSec,
-            targetPowerW = open.planned?.block?.targetPowerW,
+            targetPowerW = open.planned?.block?.targetWatts(ftpW),
             targetCadenceRpm = open.planned?.block?.targetCadenceRpm,
+            targetFtpPercent = open.planned?.block?.targetFtpPercent,
             plannedDurationSec = open.planned?.block?.durationSec,
             endedEarly = endedEarly,
             stats = open.stats.summary(),
@@ -257,8 +264,9 @@ class WorkoutSession(
         kind = kind,
         elapsedSec = elapsedSec,
         plannedDurationSec = planned?.block?.durationSec,
-        targetPowerW = planned?.block?.targetPowerW,
+        targetPowerW = planned?.block?.targetWatts(ftpW),
         targetCadenceRpm = planned?.block?.targetCadenceRpm,
+        targetFtpPercent = planned?.block?.targetFtpPercent,
         stats = stats.summary(),
     )
 
