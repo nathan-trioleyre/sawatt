@@ -1,67 +1,130 @@
-# Contribuer à Sawatt
+# Contributing to Sawatt
 
-## Flux de travail : GitHub Flow
+This guide is for developers: how to build Sawatt, how the code is organised, and the rules every
+change follows. For what the app does, see the [README](README.md).
 
-- `main` est toujours stable : elle compile et ses tests passent.
-- Chaque tâche se fait sur une branche courte, créée depuis `main` à jour.
-- Les releases sont des tags sur `main`.
-- Il n'y a pas de branche `develop`, ni de branches `release` ou `hotfix`, sauf demande explicite du mainteneur.
+## Development setup
+
+You need JDK 17 or 21 (Gradle 8.14 does not run on JDK 25) and the Android SDK with platform 36.
+`local.properties` (not versioned) points to the SDK, e.g. `sdk.dir=/home/<you>/Android/Sdk`.
+
+```sh
+export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+./gradlew :core:test                    # unit tests (protocol, formulas, interval engine, history)
+./gradlew :app:lintDebug :app:assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+
+Application id: `app.sawatt`. Every pull request also attaches a ready-to-install debug APK to its
+CI run (see [Continuous integration](#continuous-integration)).
+
+## Project structure
+
+```
+core/   Pure Kotlin/JVM, unit-tested
+        ble/       Cycling Power / Heart Rate / advertising parsers, cadence calculation
+        trainer/   TrainerConnection interface + SimulatedTrainer (hardware-free trainer)
+        ride/      virtual speed, kcal, FTP and max HR estimates, power zones
+        workout/   WorkoutPlan, WorkoutSession (interval engine), statistics
+        history/   week/month/year aggregation, JSON configuration
+app/    Android app
+        ble/       BleManager (TrainerConnection over Bluetooth), SwitchingTrainerConnection
+                   (switches between real and simulated trainer from the "Simulated bike" setting)
+        workout/   WorkoutController (1 Hz clock, beeps, saving), WorkoutService (foreground service)
+        data/      JSON-file repositories (profile, settings, plans, history)
+        ui/        Compose screens
+```
+
+## How it works
+
+```
+Bike ────BLE──► TrainerConnection ──► WorkoutController ──► WorkoutSession ──► Screens
+HR strap ─BLE──┘ (BleManager or       (1 Hz clock,          (interval          (Compose)
+                  SimulatedTrainer)    beeps, saving)        engine)
+                                                                  │
+                                                                  ▼
+                                                  HistoryRepository (JSON files)
+```
+
+- All sensor communication goes through the `TrainerConnection` interface (`core`). `BleManager`
+  implements it over Bluetooth, `SimulatedTrainer` without any hardware; unit tests and the demo
+  mode use the latter.
+- The bike sends about two measurements per second: instantaneous power and a timestamped crank
+  revolution counter. Cadence is derived from that counter: `60 × Δrevolutions × 1024 / Δtime`.
+- The engine (`WorkoutSession`) has no clock of its own. `tick()` is called once per second of
+  riding. On each call it:
+  - averages the readings received during that second into one sample;
+  - adds the sample to the whole session and to the current interval;
+  - advances the plan.
+- Pausing stops the clock. With no data for 3 s, power drops to 0 W.
+- When a workout ends, the summary and per-interval statistics are saved to `history/index.json`,
+  and the second-by-second trace to `history/<id>.samples.json`.
+
+## Workflow: GitHub Flow
+
+- `main` is always stable: it compiles and its tests pass.
+- Every task is done on a short-lived branch created from an up-to-date `main`.
+- Releases are tags on `main`.
+- There is no `develop` branch, and no `release` or `hotfix` branches, unless the maintainer
+  explicitly asks for one.
 
 ### Branches
 
-- Une branche se nomme selon le type de la tâche, suivi d'un sujet court en kebab-case :
-  - `feat/` : nouvelle fonctionnalité ;
-  - `fix/` : correction de bug ;
-  - `refactor/` : restructuration sans changement de comportement ;
-  - `docs/` : documentation ;
-  - `chore/` : outillage, dépendances, CI.
+- A branch is named after the type of task, followed by a short kebab-case topic:
+  - `feat/`: new feature;
+  - `fix/`: bug fix;
+  - `refactor/`: restructuring without behaviour change;
+  - `docs/`: documentation;
+  - `chore/`: tooling, dependencies, CI.
 
-  Par exemple : `feat/countdown-beeps`, `fix/cadence-overflow`.
-- Une branche ne traite qu'**un seul sujet**. Si une tâche déborde, on la découpe en plusieurs branches.
+  For example: `feat/countdown-beeps`, `fix/cadence-overflow`.
+- A branch covers **one topic only**. If a task grows beyond that, split it into several branches.
 
-### Protection de `main`
+### Protecting `main`
 
-- On ne committe jamais directement sur `main`.
-- On ne fait jamais de force push sur `main` et on ne réécrit pas son historique.
-- Tout arrive sur `main` par une pull request.
-- **Rien n'est poussé, aucune PR n'est mergée et aucun tag n'est créé sans l'accord explicite du mainteneur.**
+- Never commit directly to `main`.
+- Never force-push to `main` or rewrite its history.
+- Everything reaches `main` through a pull request.
+- **Nothing is pushed, no PR is merged and no tag is created without the maintainer's explicit
+  approval.**
 
 ## Commits
 
-### Avant chaque commit
+### Before every commit
 
-Lancer le lint et les tests. On ne committe pas si quelque chose échoue.
+Run lint and tests. Do not commit if anything fails.
 
 ```sh
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 ./gradlew :core:test :app:lintDebug :app:assembleDebug
 ```
 
-- On ne committe jamais de secrets, de configuration locale (`local.properties`, fichiers d'IDE) ni d'artefacts de build.
-- Les commits sont **petits**, avec un seul changement logique par commit.
+- Never commit secrets, local configuration (`local.properties`, IDE files) or build artifacts.
+- Keep commits **small**, with one logical change per commit.
 
-### Messages : Conventional Commits
+### Messages: Conventional Commits
 
 ```
-<type>(<scope optionnel>): <description>
+<type>(<optional scope>): <description>
 
-<corps optionnel : le pourquoi, si ce n'est pas évident>
+<optional body: the why, when it is not obvious>
 
-<BREAKING CHANGE: … si besoin>
+<BREAKING CHANGE: … when needed>
 ```
 
-- **Types** : `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `perf`.
-- **Scopes courants** : `ble`, `workout`, `history`, `ui`, `core`, `build`.
-- **Description** :
-  - en anglais ;
-  - à l'impératif ;
-  - en minuscules ;
-  - sans point final ;
-  - moins de 72 caractères.
-- On ajoute un **corps** quand le pourquoi n'est pas évident.
-- Un **changement cassant** se signale par `!` après le type (`feat(core)!: …`) ou par une ligne `BREAKING CHANGE: …`.
+- **Types**: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `perf`.
+- **Common scopes**: `ble`, `workout`, `history`, `ui`, `core`, `build`.
+- **Description**:
+  - in English;
+  - in the imperative mood;
+  - lowercase;
+  - no trailing period;
+  - under 72 characters.
+- Add a **body** when the reason is not obvious.
+- Flag a **breaking change** with `!` after the type (`feat(core)!: …`) or a `BREAKING CHANGE: …`
+  line.
 
-Exemples :
+Examples:
 
 ```
 feat(ble): add FTMS trainer discovery
@@ -71,39 +134,45 @@ refactor(core)!: rename StatsSummary fields
 
 ## Pull requests
 
-- Le titre suit le même format que les commits.
-- La description indique :
-  - **ce qui change** ;
-  - **pourquoi** ;
-  - **comment tester**.
+- The title uses the same format as commit messages.
+- The description states:
+  - **what changes**;
+  - **why**;
+  - **how to test**.
 
-  Le modèle `.github/pull_request_template.md` reprend ces trois rubriques.
-- La CI doit passer avant le merge.
-- Le merge se fait en **squash** par défaut.
+  The `.github/pull_request_template.md` template provides these three sections.
+- CI must pass before merging.
+- Pull requests are **squash-merged** by default; the squash commit takes the PR title, so `main`
+  keeps a clean Conventional Commits history.
 
-## Intégration continue
+## Continuous integration
 
-Le workflow `.github/workflows/ci.yml` tourne sur chaque PR et sur `main` :
+The `.github/workflows/ci.yml` workflow runs on every PR and on `main`:
 
-| Job | Rôle |
+| Job | Purpose |
 |---|---|
-| `changes` | Détecte si la PR ne touche que de la documentation (`*.md`, `docs/`) : les jobs suivants sont alors sautés. |
+| `changes` | Detects whether the PR only touches documentation (`*.md`, `docs/`); if so, the next jobs are skipped. |
 | `unit tests` | `./gradlew :core:test` |
-| `lint and build` | `./gradlew :app:lintDebug :app:assembleDebug`. Sur une PR, l'APK de debug est joint au run (artefact `sawatt-debug-apk`, 14 jours) pour l'installer sur un téléphone. |
-| `ci` | Synthèse : c'est la **seule vérification exigée** par la protection de `main`. Elle échoue si un job a échoué. |
+| `lint and build` | `./gradlew :app:lintDebug :app:assembleDebug`. On a PR, the debug APK is attached to the run (`sawatt-debug-apk` artifact, kept 14 days) so it can be installed on a phone. |
+| `ci` | Summary job and the **only check required** by `main`'s branch protection. It fails if any job failed. |
 
-- Le cache Gradle (dépendances et cache de build) n'est écrit que par les runs sur `main`. Les PR le lisent : seules les parties modifiées sont recompilées.
-- Les actions sont épinglées par SHA de commit. Dependabot propose chaque mois leur mise à jour.
+- The Gradle cache (dependencies and build cache) is only written by runs on `main`. PRs read it, so
+  only what changed is rebuilt.
+- Actions are pinned to commit SHAs. Dependabot proposes updates every month.
 
-## Versions et releases
+## Versions and releases
 
-- Versionnage sémantique : `vMAJOR.MINOR.PATCH`.
-- Une release est un tag sur `main`, créé **uniquement à la demande du mainteneur**.
-- Le changelog est généré à partir des messages de commit.
+- Semantic versioning: `vMAJOR.MINOR.PATCH`.
+- A release is a tag on `main`, created **only when the maintainer asks for it**.
+- The changelog is generated from commit messages.
 
-## Règles d'architecture
+## Architecture rules
 
-- Toute la communication Bluetooth passe par une **interface abstraite**.
-- Une **implémentation simulée** du home trainer sert aux tests.
-- La logique des séances d'intervalles ne dépend **jamais directement** de la couche Bluetooth.
-- **Aucun test unitaire ne doit nécessiter de matériel réel.**
+- All Bluetooth communication goes through an **abstract interface**.
+- A **simulated** trainer implementation is used for tests.
+- Interval workout logic **never depends directly** on the Bluetooth layer.
+- **No unit test may require real hardware.**
+
+## Documentation
+
+Repository documentation (README, this guide, PR template) is written in English.
