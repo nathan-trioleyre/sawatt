@@ -15,13 +15,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsBike
-import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Flag
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -54,6 +49,7 @@ import app.sawatt.core.workout.CurrentInterval
 import app.sawatt.core.workout.IntervalKind
 import app.sawatt.core.workout.LiveState
 import app.sawatt.core.workout.WorkoutPlan
+import app.sawatt.ui.components.SawattIcons
 import app.sawatt.ui.components.SawattTopBar
 import app.sawatt.ui.components.IntervalTable
 import app.sawatt.ui.components.SectionCard
@@ -93,7 +89,7 @@ fun WorkoutScreen(
         topBar = {
             SawattTopBar(plan?.name ?: "Free ride", onBack) {
                 IconButton(onClick = onDevices) {
-                    Icon(Icons.AutoMirrored.Filled.DirectionsBike, "Bike", tint = if (bikeOk) SawattColors.OnTarget else Color.Gray)
+                    Icon(SawattIcons.DirectionsBike, "Bike", tint = if (bikeOk) SawattColors.OnTarget else Color.Gray)
                 }
                 Icon(
                     Icons.Default.Favorite, "Heart rate",
@@ -151,7 +147,7 @@ private fun Idle(plan: WorkoutPlan?, readings: SensorReadings, bikeOk: Boolean, 
             Text("No bike connected", style = MaterialTheme.typography.titleMedium)
             Text("You can start anyway; data appears as soon as the bike is connected.", style = MaterialTheme.typography.bodySmall)
             OutlinedButton(onClick = onDevices) {
-                Icon(Icons.Default.Bluetooth, null)
+                Icon(SawattIcons.Bluetooth, null)
                 Spacer(Modifier.width(8.dp))
                 Text("Connect devices")
             }
@@ -311,11 +307,11 @@ private fun Controls(
             }
             WorkoutStatus.RUNNING -> {
                 FilledTonalButton(onClick = onPause, modifier = big) {
-                    Icon(Icons.Default.Pause, null)
+                    Icon(SawattIcons.Pause, null)
                     Text("Pause")
                 }
                 Button(onClick = onLap, modifier = big) {
-                    Icon(Icons.Default.Flag, null, Modifier.size(20.dp))
+                    Icon(SawattIcons.Flag, null, Modifier.size(20.dp))
                     Spacer(Modifier.width(4.dp))
                     Text("Lap")
                 }
@@ -326,7 +322,7 @@ private fun Controls(
                     Text("Resume")
                 }
                 FilledTonalButton(onClick = onFinish, modifier = big) {
-                    Icon(Icons.Default.Stop, null)
+                    Icon(SawattIcons.Stop, null)
                     Text("Finish")
                 }
                 OutlinedButton(
