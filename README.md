@@ -1,4 +1,4 @@
-# Sawatt
+# SaWatt
 
 > *Ça watt ? Ça watt !* — French for "Pushing the watts? Pushing the watts!": are you pedalling hard?
 > Yes you are.
@@ -8,11 +8,11 @@ interval you are riding right now.**
 
 Most indoor bike apps show either your instantaneous watts, which jump around with every pedal
 stroke, or the average of the whole session, which tells you nothing about the effort you are in.
-Sawatt shows what you actually need during intervals: **the average power since the current
+SaWatt shows what you actually need during intervals: **the average power since the current
 interval started**, colour-coded against your target. Ride `3 × 15' @ 250 W` and you know, block by
 block, whether you are on target.
 
-## What you can do with Sawatt
+## What you can do with SaWatt
 
 ### Ride structured workouts
 - Build your own sessions from blocks: duration, target power and, if you want, target cadence.
@@ -36,21 +36,21 @@ block, whether you are on target.
 - Weekly, monthly and yearly summaries: time, distance, calories, average and max power.
 
 ### Train on your numbers
-- Enter your FTP and max heart rate, or let Sawatt estimate them from your profile.
+- Enter your FTP and max heart rate, or let SaWatt estimate them from your profile.
 - Metric or imperial units.
 
 ### Private by design
 - No account, no ads, no tracking.
-- Sawatt does not even request internet access: your workouts stay on your phone.
+- SaWatt does not even request internet access: your workouts stay on your phone.
 
 ## Compatibility
 
 ### Bikes, trainers and power meters
-Sawatt works with any device that broadcasts power over the standard **Bluetooth Cycling Power
+SaWatt works with any device that broadcasts power over the standard **Bluetooth Cycling Power
 service**. That includes:
 
 - **indoor and spin bikes with Bluetooth power output**, including self-powered bikes that wake up
-  when you start pedalling (Sawatt reconnects automatically);
+  when you start pedalling (SaWatt reconnects automatically);
 - **smart trainers**: most of them broadcast the Cycling Power service alongside their trainer
   protocol;
 - **Bluetooth power meters**: pedals, cranks and spiders.
@@ -68,7 +68,7 @@ vast majority of Bluetooth heart-rate monitors.
 
 ### Not supported yet
 - **ANT+** sensors: Bluetooth only for now.
-- **Trainer resistance control (ERG mode)** and trainers that only expose the FTMS protocol: Sawatt
+- **Trainer resistance control (ERG mode)** and trainers that only expose the FTMS protocol: SaWatt
   reads power from the Cycling Power service and does not set the resistance.
 - **Speed/cadence-only sensors** without power measurement.
 - Bikes that only talk to their own app through a proprietary protocol.
@@ -85,7 +85,7 @@ follow your workout's targets. It is the quickest way to discover the app.
 
 ## Getting the app
 
-Sawatt is not on the Play Store yet. In the meantime you can install a test build (debug APK)
+SaWatt is not on the Play Store yet. In the meantime you can install a test build (debug APK)
 attached to each pull request's CI run, or build it yourself: see
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -100,7 +100,7 @@ attached to each pull request's CI run, or build it yourself: see
 
 ## Contributing
 
-Sawatt is developed in the open. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup,
+SaWatt is developed in the open. Read [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup,
 how the app works under the hood, and the workflow rules.
 
 ## License
