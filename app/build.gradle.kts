@@ -33,6 +33,15 @@ android {
     }
 }
 
+androidComponents {
+    beforeVariants { variant ->
+        // Les tests unitaires vivent dans :core et l'app n'a pas de tests instrumentés : sans ces
+        // composants vides, le lint n'analyse pas deux jeux de sources inutiles.
+        variant.enableAndroidTest = false
+        variant.enableUnitTest = false
+    }
+}
+
 kotlin {
     compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
 }
