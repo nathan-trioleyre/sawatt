@@ -46,6 +46,8 @@ data class AppSettings(
     /** Generate fake bike + heart-rate data (demo mode). */
     val simulateBike: Boolean = false,
     val transitionBeep: Boolean = true,
+    /** Short beeps 3, 2 and 1 seconds before each planned block ends. */
+    val countdownBeeps: Boolean = true,
     val keepScreenOn: Boolean = true,
     /** Address of the heart-rate strap to reconnect automatically after a scan. */
     val defaultHrSensor: String? = null,

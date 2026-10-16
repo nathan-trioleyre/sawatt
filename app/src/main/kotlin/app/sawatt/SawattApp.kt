@@ -11,6 +11,7 @@ import app.sawatt.data.HistoryRepository
 import app.sawatt.data.JsonStore
 import app.sawatt.data.PlanRepository
 import app.sawatt.data.SettingsRepository
+import app.sawatt.data.WorkoutExporter
 import app.sawatt.workout.WorkoutController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -50,6 +51,7 @@ class AppContainer(context: Context) {
         useSimulated = settings.app.map { it.simulateBike }.stateIn(scope, SharingStarted.Eagerly, settings.app.value.simulateBike),
     )
     val workout = WorkoutController(context, scope, trainer, settings, history)
+    val exporter = WorkoutExporter(context, history)
 
     init {
         // Auto-select the last used bike / strap when a scan finds them.

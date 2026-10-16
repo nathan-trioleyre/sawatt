@@ -47,6 +47,7 @@ import app.sawatt.core.workout.WorkoutRecord
 import app.sawatt.core.workout.WorkoutSamples
 import app.sawatt.ui.Routes
 import app.sawatt.ui.components.SawattTopBar
+import app.sawatt.ui.components.ExportButton
 import app.sawatt.ui.components.IntervalTable
 import app.sawatt.ui.components.PowerChart
 import app.sawatt.ui.components.SectionCard
@@ -70,7 +71,7 @@ fun SummaryScreen(container: AppContainer, onDone: () -> Unit) {
     val r = record
 
     Scaffold(
-        topBar = { SawattTopBar("Workout summary") },
+        topBar = { SawattTopBar("Workout summary") { r?.let { ExportButton(container.exporter, it) } } },
         bottomBar = {
             Row(Modifier.fillMaxWidth().padding(12.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 TextButton(onClick = { confirmDelete = true }, enabled = r != null) { Text("Delete") }
@@ -186,6 +187,7 @@ fun HistoryDetailScreen(container: AppContainer, id: String, onBack: () -> Unit)
     Scaffold(
         topBar = {
             SawattTopBar(record?.let { formatDateTime(it.startEpochMs) } ?: "Workout", onBack) {
+                record?.let { ExportButton(container.exporter, it) }
                 IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, "Delete") }
             }
         },

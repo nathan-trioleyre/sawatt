@@ -20,7 +20,7 @@ block, whether you are on target.
 - Repeat sets in one tap: `10' warm-up → 3 × [15' @ 250 W + 5' recovery] → 10' cool-down`.
 - During the ride, see the current target, the time left in the interval, a progress bar and what
   comes next.
-- A beep marks every transition, so you can keep your eyes off the screen.
+- A 3-2-1 countdown and a beep mark every transition, so you can keep your eyes off the screen.
 
 ### Know exactly how each interval went
 - Live **interval average power**, green when you are on target, blue below, red above.
@@ -30,6 +30,10 @@ block, whether you are on target.
 ### Split a free ride whenever you want
 - Press **Lap** at any time to start a new interval with its own averages: perfect for climbs,
   sprints or unplanned efforts.
+
+### Send your workouts anywhere
+- Export any workout as a **FIT** or **TCX** file, with one lap per interval, and share it to
+  Strava, Garmin Connect, intervals.icu, TrainingPeaks, a drive or an email.
 
 ### Follow your progress
 - Every workout keeps its interval table, a power chart with your targets and the time spent in
@@ -92,9 +96,8 @@ attached to each pull request's CI run, or build it yourself: see
 
 ## Roadmap
 
-- Countdown beeps (3-2-1) before each transition.
 - French interface.
-- Workout export (TCX/FIT) and Strava upload.
+- Direct upload to Strava.
 - Data backup and restore.
 - FTP test, VO2max test, levels and weekly challenges.
 

@@ -44,5 +44,16 @@
             android:name=".workout.WorkoutService"
             android:exported="false"
             android:foregroundServiceType="connectedDevice" />
+
+        <!-- Shares exported workout files (FIT/TCX) with other apps. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 </manifest>
