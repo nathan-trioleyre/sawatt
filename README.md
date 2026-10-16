@@ -39,11 +39,13 @@ séance comme `3 × 15'` et voir sa moyenne pour chaque bloc.
 ```
 core/   Kotlin/JVM pur, testé unitairement
         ble/       parseurs Cycling Power / Heart Rate / advertising, calcul de cadence
+        trainer/   interface TrainerConnection + SimulatedTrainer (home trainer simulé)
         ride/      vitesse virtuelle, kcal, estimations FTP et FC max, zones
         workout/   WorkoutPlan, WorkoutSession (moteur d'intervalles), statistiques
         history/   agrégation semaine/mois/année, configuration JSON
 app/    Application Android
-        ble/       BleManager (scan, connexion, notifications, reconnexion auto), BikeSimulator
+        ble/       BleManager (TrainerConnection en Bluetooth), SwitchingTrainerConnection
+                   (bascule réel / simulé selon le réglage « vélo simulé »)
         workout/   WorkoutController (horloge 1 Hz, bips, sauvegarde), WorkoutService (premier plan)
         data/      dépôts en fichiers JSON (profil, réglages, séances, historique)
         ui/        écrans Compose
@@ -52,14 +54,17 @@ app/    Application Android
 ### Fonctionnement
 
 ```
-Vélo ──BLE──► BleManager ──► WorkoutController ──► WorkoutSession ──► Écrans
-Ceinture ─BLE─┘ (scan,         (horloge 1 Hz,       (moteur            (Compose)
-                 connexion,     bips, sauvegarde)    d'intervalles)
-                 décodage)                                │
-                                                          ▼
-                                          HistoryRepository (fichiers JSON)
+Vélo ──BLE──► TrainerConnection ──► WorkoutController ──► WorkoutSession ──► Écrans
+Ceinture ─BLE─┘ (BleManager ou    (horloge 1 Hz,       (moteur            (Compose)
+                 SimulatedTrainer)  bips, sauvegarde)    d'intervalles)
+                                                               │
+                                                               ▼
+                                               HistoryRepository (fichiers JSON)
 ```
 
+- Toute la communication avec les capteurs passe par l'interface `TrainerConnection` (module
+  `core`). `BleManager` l'implémente en Bluetooth, `SimulatedTrainer` sans matériel : les tests
+  unitaires et le mode démo utilisent ce dernier.
 - Le vélo envoie environ deux mesures par seconde : la puissance, et un compteur de tours de
   pédalier horodaté. La cadence est déduite de ce compteur : `60 × Δtours × 1024 / Δtemps`.
 - Le moteur (`WorkoutSession`) ne dépend d'aucune horloge. `tick()` est appelé une fois par seconde
@@ -91,7 +96,7 @@ Identifiant de l'application : `app.sawatt`.
 ### Fait
 
 - Module `core` : parseurs BLE, calcul de cadence, formules, moteur de séance par intervalles,
-  agrégation de l'historique. 21 tests unitaires, qui passent.
+  agrégation de l'historique, home trainer simulé. 25 tests unitaires, qui passent, sans aucun matériel.
 - Application Android :
   - connexion vélo / ceinture ;
   - sortie libre avec Tour ;

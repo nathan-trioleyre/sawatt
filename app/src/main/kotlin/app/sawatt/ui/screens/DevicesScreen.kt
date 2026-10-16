@@ -59,12 +59,14 @@ private val blePermissions: Array<String> =
 
 @Composable
 fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
-    val ble = container.ble
+    val trainer = container.trainer
+    val app by container.settings.app.collectAsStateWithLifecycle()
+    val simulated = app.simulateBike
     val context = LocalContext.current
-    val scanning by ble.scanning.collectAsStateWithLifecycle()
-    val discovered by ble.discovered.collectAsStateWithLifecycle()
-    val bike by ble.bike.collectAsStateWithLifecycle()
-    val hr by ble.heartRateSensor.collectAsStateWithLifecycle()
+    val scanning by trainer.scanning.collectAsStateWithLifecycle()
+    val discovered by trainer.discovered.collectAsStateWithLifecycle()
+    val bike by trainer.bike.collectAsStateWithLifecycle()
+    val hr by trainer.heartRateSensor.collectAsStateWithLifecycle()
     val readings by container.workout.readings.collectAsStateWithLifecycle()
     var message by remember { mutableStateOf<String?>(null) }
 
@@ -73,15 +75,15 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
     }
 
     val enableBt = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (ble.isEnabled()) ble.startScan() else message = "Bluetooth must be on to connect."
+        if (trainer.isEnabled()) trainer.startScan() else message = "Bluetooth must be on to connect."
     }
 
     fun scan() {
         message = null
-        if (!ble.isEnabled()) {
+        if (!trainer.isEnabled()) {
             enableBt.launch(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
         } else {
-            ble.startScan()
+            trainer.startScan()
         }
     }
 
@@ -95,7 +97,8 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
     }
 
     fun requestScan() {
-        if (hasPermissions()) scan() else permissionLauncher.launch(blePermissions + notificationPermission())
+        // Le vélo simulé n'utilise pas le Bluetooth : pas de permission à demander.
+        if (simulated || hasPermissions()) scan() else permissionLauncher.launch(blePermissions + notificationPermission())
     }
 
     LaunchedEffect(Unit) { requestScan() }
@@ -103,18 +106,18 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
     Scaffold(topBar = { SawattTopBar("Connect devices", onBack) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             LinkCard("Bike", bike, extra = bike?.let { "${readings.powerW} W · ${readings.cadenceRpm} rpm" + (it.firmware?.let { f -> " · fw $f" } ?: "") }) {
-                ble.disconnect(DeviceType.BIKE)
-                container.settings.updateApp { it.copy(defaultBike = null) }
+                trainer.disconnect(DeviceType.BIKE)
+                if (!simulated) container.settings.updateApp { it.copy(defaultBike = null) }
             }
             LinkCard("Heart rate", hr, extra = hr?.let { "${readings.heartRate} bpm" }) {
-                ble.disconnect(DeviceType.HEART_RATE)
-                container.settings.updateApp { it.copy(defaultHrSensor = null) }
+                trainer.disconnect(DeviceType.HEART_RATE)
+                if (!simulated) container.settings.updateApp { it.copy(defaultHrSensor = null) }
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(onClick = ::requestScan, enabled = !scanning) { Text(if (scanning) "Scanning…" else "Scan") }
                 Spacer(Modifier.width(12.dp))
-                if (scanning) OutlinedButton(onClick = ble::stopScan) { Text("Stop") }
+                if (scanning) OutlinedButton(onClick = trainer::stopScan) { Text("Stop") }
             }
             if (scanning) LinearProgressIndicator(Modifier.fillMaxWidth())
             message?.let { Text(it, color = MaterialTheme.colorScheme.error) }
@@ -128,9 +131,12 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
                 val connected = setOfNotNull(bike?.device?.address, hr?.device?.address)
                 items(discovered.filter { it.address !in connected }, key = { it.address }) { d ->
                     DeviceRow(d) {
-                        ble.connect(d)
-                        container.settings.updateApp {
-                            if (d.type == DeviceType.BIKE) it.copy(defaultBike = d.address) else it.copy(defaultHrSensor = d.address)
+                        trainer.connect(d)
+                        // Ne mémorise que les vrais appareils, pour les reconnecter automatiquement.
+                        if (!simulated) {
+                            container.settings.updateApp {
+                                if (d.type == DeviceType.BIKE) it.copy(defaultBike = d.address) else it.copy(defaultHrSensor = d.address)
+                            }
                         }
                     }
                 }

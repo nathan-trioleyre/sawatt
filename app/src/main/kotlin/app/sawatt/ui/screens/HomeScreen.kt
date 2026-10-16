@@ -44,9 +44,8 @@ import app.sawatt.workout.WorkoutStatus
 @Composable
 fun HomeScreen(container: AppContainer, nav: NavController) {
     val workout by container.workout.state.collectAsStateWithLifecycle()
-    val bike by container.ble.bike.collectAsStateWithLifecycle()
-    val hr by container.ble.heartRateSensor.collectAsStateWithLifecycle()
-    val app by container.settings.app.collectAsStateWithLifecycle()
+    val bike by container.trainer.bike.collectAsStateWithLifecycle()
+    val hr by container.trainer.heartRateSensor.collectAsStateWithLifecycle()
 
     Scaffold(topBar = { SawattTopBar("Sawatt") }) { padding ->
         Column(
@@ -54,7 +53,6 @@ fun HomeScreen(container: AppContainer, nav: NavController) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             val bikeText = when {
-                app.simulateBike -> "Simulated bike"
                 bike == null -> "No bike connected"
                 bike?.state == LinkState.CONNECTED -> "Bike: ${bike?.device?.name}"
                 else -> "Bike: ${bike?.device?.name} (waiting…)"
