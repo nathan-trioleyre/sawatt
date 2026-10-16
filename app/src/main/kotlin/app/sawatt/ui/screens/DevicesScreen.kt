@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsBike
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -47,6 +46,7 @@ import app.sawatt.core.trainer.DeviceLink
 import app.sawatt.core.trainer.DeviceType
 import app.sawatt.core.trainer.DiscoveredDevice
 import app.sawatt.core.trainer.LinkState
+import app.sawatt.ui.components.SawattIcons
 import app.sawatt.ui.components.SawattTopBar
 import app.sawatt.ui.theme.SawattColors
 
@@ -179,7 +179,7 @@ private fun DeviceRow(device: DiscoveredDevice, onClick: () -> Unit) {
     ) {
         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             if (device.type == DeviceType.BIKE) {
-                Icon(Icons.AutoMirrored.Filled.DirectionsBike, contentDescription = "Bike", tint = MaterialTheme.colorScheme.primary)
+                Icon(SawattIcons.DirectionsBike, contentDescription = "Bike", tint = MaterialTheme.colorScheme.primary)
             } else {
                 Icon(Icons.Default.Favorite, contentDescription = "Heart rate", tint = SawattColors.HeartRed)
             }

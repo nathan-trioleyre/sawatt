@@ -15,13 +15,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -55,6 +52,7 @@ import app.sawatt.core.workout.PlanStep
 import app.sawatt.core.workout.RepeatSet
 import app.sawatt.core.workout.WorkoutPlan
 import app.sawatt.ui.Routes
+import app.sawatt.ui.components.SawattIcons
 import app.sawatt.ui.components.SawattTopBar
 import app.sawatt.ui.components.SectionCard
 import app.sawatt.ui.formatDuration
@@ -242,7 +240,7 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
                         ),
                     )
                 }) {
-                    Icon(Icons.Default.Repeat, null)
+                    Icon(SawattIcons.Repeat, null)
                     Text("Repeat set")
                 }
             }
@@ -276,8 +274,8 @@ private fun StepEditor(step: EditStep, onMoveUp: () -> Unit, onMoveDown: () -> U
                         Spacer(Modifier.weight(1f))
                     }
                 }
-                IconButton(onClick = onMoveUp) { Icon(Icons.Default.ArrowUpward, "Move up") }
-                IconButton(onClick = onMoveDown) { Icon(Icons.Default.ArrowDownward, "Move down") }
+                IconButton(onClick = onMoveUp) { Icon(SawattIcons.ArrowUpward, "Move up") }
+                IconButton(onClick = onMoveDown) { Icon(SawattIcons.ArrowDownward, "Move down") }
                 IconButton(onClick = onRemove) { Icon(Icons.Default.Delete, "Remove") }
             }
             when (step) {

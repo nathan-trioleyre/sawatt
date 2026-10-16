@@ -13,11 +13,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsBike
-import androidx.compose.material.icons.automirrored.filled.ListAlt
-import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
@@ -38,6 +33,7 @@ import androidx.navigation.NavController
 import app.sawatt.AppContainer
 import app.sawatt.core.trainer.LinkState
 import app.sawatt.ui.Routes
+import app.sawatt.ui.components.SawattIcons
 import app.sawatt.ui.components.SawattTopBar
 import app.sawatt.workout.WorkoutStatus
 
@@ -61,24 +57,24 @@ fun HomeScreen(container: AppContainer, nav: NavController) {
             Text(bikeText + hrText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
             if (workout.status != WorkoutStatus.IDLE) {
-                MenuCard(Icons.AutoMirrored.Filled.DirectionsBike, "Back to workout", "A workout is in progress") {
+                MenuCard(SawattIcons.DirectionsBike, "Back to workout", "A workout is in progress") {
                     nav.navigate(Routes.workout(workout.plan?.id))
                 }
             } else {
-                MenuCard(Icons.AutoMirrored.Filled.DirectionsBike, "Free ride", "Ride freely, split with the Lap button") {
+                MenuCard(SawattIcons.DirectionsBike, "Free ride", "Ride freely, split with the Lap button") {
                     nav.navigate(Routes.workout(null))
                 }
-                MenuCard(Icons.AutoMirrored.Filled.ListAlt, "Structured workouts", "Build and ride interval plans") {
+                MenuCard(SawattIcons.ListAlt, "Structured workouts", "Build and ride interval plans") {
                     nav.navigate(Routes.PLANS)
                 }
             }
-            MenuCard(Icons.Default.Bluetooth, "Connect devices", "Bike and heart-rate strap") { nav.navigate(Routes.DEVICES) }
-            MenuCard(Icons.Default.History, "Workout history", "Workouts, weeks, months, years") { nav.navigate(Routes.HISTORY) }
+            MenuCard(SawattIcons.Bluetooth, "Connect devices", "Bike and heart-rate strap") { nav.navigate(Routes.DEVICES) }
+            MenuCard(SawattIcons.History, "Workout history", "Workouts, weeks, months, years") { nav.navigate(Routes.HISTORY) }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 SmallCard(Icons.Default.Person, "Profile", Modifier.weight(1f)) { nav.navigate(Routes.PROFILE) }
                 SmallCard(Icons.Default.Settings, "Settings", Modifier.weight(1f)) { nav.navigate(Routes.SETTINGS) }
             }
-            MenuCard(Icons.Default.HourglassEmpty, "Coming later", "FTP test, VO2max test, levels & medals, Strava") {
+            MenuCard(SawattIcons.HourglassEmpty, "Coming later", "FTP test, VO2max test, levels & medals, Strava") {
                 nav.navigate(Routes.LATER)
             }
         }
