@@ -43,10 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sawatt.AppContainer
-import app.sawatt.ble.DeviceLink
-import app.sawatt.ble.DeviceType
-import app.sawatt.ble.DiscoveredDevice
-import app.sawatt.ble.LinkState
+import app.sawatt.core.trainer.DeviceLink
+import app.sawatt.core.trainer.DeviceType
+import app.sawatt.core.trainer.DiscoveredDevice
+import app.sawatt.core.trainer.LinkState
 import app.sawatt.ui.components.SawattTopBar
 import app.sawatt.ui.theme.SawattColors
 
@@ -73,12 +73,12 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
     }
 
     val enableBt = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (ble.isBluetoothEnabled()) ble.startScan() else message = "Bluetooth must be on to connect."
+        if (ble.isEnabled()) ble.startScan() else message = "Bluetooth must be on to connect."
     }
 
     fun scan() {
         message = null
-        if (!ble.isBluetoothEnabled()) {
+        if (!ble.isEnabled()) {
             enableBt.launch(Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE))
         } else {
             ble.startScan()

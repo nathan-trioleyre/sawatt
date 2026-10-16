@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import app.sawatt.AppContainer
-import app.sawatt.ble.LinkState
+import app.sawatt.core.trainer.LinkState
 import app.sawatt.ui.Routes
 import app.sawatt.ui.components.SawattTopBar
 import app.sawatt.workout.WorkoutStatus

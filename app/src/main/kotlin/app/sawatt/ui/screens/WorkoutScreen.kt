@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sawatt.AppContainer
-import app.sawatt.ble.LinkState
+import app.sawatt.core.trainer.LinkState
 import app.sawatt.core.model.UnitSystem
 import app.sawatt.core.workout.CurrentInterval
 import app.sawatt.core.workout.IntervalKind

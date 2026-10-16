@@ -3,7 +3,7 @@ package app.sawatt
 import android.app.Application
 import android.content.Context
 import app.sawatt.ble.BleManager
-import app.sawatt.ble.DeviceType
+import app.sawatt.core.trainer.DeviceType
 import app.sawatt.data.HistoryRepository
 import app.sawatt.data.JsonStore
 import app.sawatt.data.PlanRepository
