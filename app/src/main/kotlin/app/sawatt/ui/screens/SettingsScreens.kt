@@ -88,6 +88,11 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             ToggleSetting("Beep at interval transitions", app.transitionBeep) { v -> update { it.copy(transitionBeep = v) } }
+            ToggleSetting(
+                "Countdown beeps",
+                app.countdownBeeps,
+                "Three short beeps in the last 3 seconds of each block.",
+            ) { v -> update { it.copy(countdownBeeps = v) } }
             ToggleSetting("Keep screen on during workouts", app.keepScreenOn) { v -> update { it.copy(keepScreenOn = v) } }
             ToggleSetting(
                 "Simulated bike (demo mode)",

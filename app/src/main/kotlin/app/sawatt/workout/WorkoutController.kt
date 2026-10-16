@@ -165,10 +165,12 @@ class WorkoutController(
     }
 
     private fun handle(events: List<SessionEvent>) {
-        if (!settings.app.value.transitionBeep) return
+        val app = settings.app.value
         when {
-            events.any { it is SessionEvent.PlanCompleted } -> beeper.planCompleted()
-            events.any { it is SessionEvent.IntervalChanged } -> beeper.transition()
+            !app.transitionBeep && !app.countdownBeeps -> return
+            app.transitionBeep && events.any { it is SessionEvent.PlanCompleted } -> beeper.planCompleted()
+            app.transitionBeep && events.any { it is SessionEvent.IntervalChanged } -> beeper.transition()
+            app.countdownBeeps && events.any { it is SessionEvent.Countdown } -> beeper.countdown()
         }
     }
 

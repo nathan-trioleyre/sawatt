@@ -19,7 +19,7 @@ block, whether you are on target.
 - Repeat sets in one tap: `10' warm-up → 3 × [15' @ 250 W + 5' recovery] → 10' cool-down`.
 - During the ride, see the current target, the time left in the interval, a progress bar and what
   comes next.
-- A beep marks every transition, so you can keep your eyes off the screen.
+- A 3-2-1 countdown and a beep mark every transition, so you can keep your eyes off the screen.
 
 ### Know exactly how each interval went
 - Live **interval average power**, green when you are on target, blue below, red above.
@@ -91,7 +91,6 @@ attached to each pull request's CI run, or build it yourself: see
 
 ## Roadmap
 
-- Countdown beeps (3-2-1) before each transition.
 - Targets as a percentage of FTP, in addition to watts.
 - French interface.
 - Workout export (TCX/FIT) and Strava upload.
