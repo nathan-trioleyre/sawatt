@@ -5,36 +5,137 @@ on:
   push:
     branches: [main]
 
+# Moindre privilège : lecture seule par défaut, chaque job n'élargit que si nécessaire.
+permissions:
+  contents: read
+
+# Un nouveau push sur une PR annule le run précédent. Sur main, chaque run va au bout pour
+# alimenter le cache Gradle utilisé par les PR.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  JAVA_VERSION: "21"
 
 jobs:
-  build:
-    name: build
+  # Détecte si la PR touche autre chose que de la documentation.
+  changes:
+    name: changes
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      code: ${{ github.event_name != 'pull_request' || steps.filter.outputs.code == 'true' }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        if: github.event_name == 'pull_request'
+        id: filter
+        with:
+          predicate-quantifier: every
+          filters: |
+            code:
+              - '**'
+              - '!**/*.md'
+              - '!docs/**'
+              - '!LICENSE'
 
-      - uses: actions/setup-java@v4
+  unit-tests:
+    name: unit tests
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: ${{ env.JAVA_VERSION }}
 
-      - uses: gradle/actions/setup-gradle@v4
+      # Valide le wrapper Gradle et met en cache Gradle User Home (dépendances, cache de build).
+      # Seuls les runs sur main écrivent le cache ; les PR le lisent.
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        with:
+          # Gratuit pour les dépôts publics ; passer à `basic` (open source) si le dépôt devient privé.
+          cache-provider: enhanced
+          add-job-summary: on-failure
+
+      - name: Unit tests
+        run: ./gradlew :core:test
+
+      - name: Upload test reports
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: unit-test-reports
+          path: core/build/reports/tests/
+          retention-days: 7
+
+  android:
+    name: lint and build
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+        with:
+          cache-provider: enhanced
+          add-job-summary: on-failure
 
       - name: Install Android SDK packages
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;35.0.0" > /dev/null
 
-      - name: Unit tests, lint and build
-        run: ./gradlew :core:test :app:lintDebug :app:assembleDebug --console=plain
+      # Lint et APK dans la même invocation : ils partagent la compilation de l'app.
+      - name: Lint and assemble
+        run: ./gradlew :app:lintDebug :app:assembleDebug
 
-      - name: Upload reports
-        if: failure()
-        uses: actions/upload-artifact@v4
+      - name: Upload debug APK
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: reports
-          path: |
-            core/build/reports/tests/
-            app/build/reports/lint-results-debug.html
+          name: sawatt-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
+
+      - name: Upload lint report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: lint-report
+          path: app/build/reports/lint-results-debug.html
+          retention-days: 7
+
+  # Vérification unique exigée par la protection de main : réussit si aucun job n'a échoué
+  # (un job sauté, par exemple pour une PR de documentation, compte comme réussi).
+  ci:
+    name: ci
+    if: always()
+    needs: [changes, unit-tests, android]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check job results
+        env:
+          RESULTS: ${{ toJSON(needs.*.result) }}
+        run: |
+          echo "$RESULTS"
+          if echo "$RESULTS" | grep -qE '"(failure|cancelled)"'; then
+            echo "::error::Au moins un job a échoué ou a été annulé."
+            exit 1
+          fi

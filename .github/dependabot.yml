@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # Tient à jour les actions épinglées par SHA dans les workflows.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+    groups:
+      github-actions:
+        patterns: ["*"]
