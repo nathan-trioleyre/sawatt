@@ -2,9 +2,8 @@ package app.sawatt.workout
 
 import android.content.Context
 import android.os.SystemClock
-import app.sawatt.ble.BikeSimulator
-import app.sawatt.ble.BleManager
 import app.sawatt.core.ride.RideMath
+import app.sawatt.core.trainer.TrainerConnection
 import app.sawatt.core.workout.LiveState
 import app.sawatt.core.workout.SessionEvent
 import app.sawatt.core.workout.WorkoutPlan
@@ -18,7 +17,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
@@ -40,7 +38,7 @@ data class SensorReadings(val powerW: Int = 0, val cadenceRpm: Int = 0, val hear
 class WorkoutController(
     private val context: Context,
     private val scope: CoroutineScope,
-    private val ble: BleManager,
+    private val trainer: TrainerConnection,
     private val settings: SettingsRepository,
     private val history: HistoryRepository,
 ) {
@@ -58,21 +56,19 @@ class WorkoutController(
     private val _lastFinished = MutableStateFlow<WorkoutRecord?>(null)
     val lastFinished: StateFlow<WorkoutRecord?> = _lastFinished.asStateFlow()
 
-    val simulator = BikeSimulator(scope) { _state.value.live?.current?.targetPowerW }
-
     private var lastBikeAt = 0L
     private var lastHrAt = 0L
 
     init {
         scope.launch {
-            merge(ble.bikeSamples, simulator.bikeSamples).collect { s ->
+            trainer.bikeSamples.collect { s ->
                 lastBikeAt = SystemClock.elapsedRealtime()
                 _readings.value = _readings.value.copy(powerW = s.powerW, cadenceRpm = s.cadenceRpm)
                 if (_state.value.status == WorkoutStatus.RUNNING) session?.onBikeSample(s.powerW, s.cadenceRpm)
             }
         }
         scope.launch {
-            merge(ble.heartRates, simulator.heartRates).collect { bpm ->
+            trainer.heartRates.collect { bpm ->
                 lastHrAt = SystemClock.elapsedRealtime()
                 _readings.value = _readings.value.copy(heartRate = bpm)
                 if (_state.value.status == WorkoutStatus.RUNNING) session?.onHeartRate(bpm)
@@ -88,9 +84,6 @@ class WorkoutController(
                 if (now - lastHrAt > STALE_MS) r = r.copy(heartRate = 0)
                 _readings.value = r
             }
-        }
-        scope.launch {
-            settings.app.collect { if (it.simulateBike) simulator.start() else simulator.stop() }
         }
     }
 

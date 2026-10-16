@@ -79,7 +79,7 @@ fun ProfileScreen(container: AppContainer, onBack: () -> Unit) {
 @Composable
 fun SettingsScreen(container: AppContainer, onBack: () -> Unit) {
     val app by container.settings.app.collectAsStateWithLifecycle()
-    val bike by container.ble.bike.collectAsStateWithLifecycle()
+    val bike by container.trainer.bike.collectAsStateWithLifecycle()
     val update = container.settings::updateApp
 
     Scaffold(topBar = { SawattTopBar("Settings", onBack) }) { padding ->

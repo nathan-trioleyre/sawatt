@@ -20,6 +20,11 @@ import app.sawatt.core.ble.CadenceCalculator
 import app.sawatt.core.ble.CyclingPowerParser
 import app.sawatt.core.ble.GattIds
 import app.sawatt.core.ble.HeartRateParser
+import app.sawatt.core.trainer.DeviceLink
+import app.sawatt.core.trainer.DeviceType
+import app.sawatt.core.trainer.DiscoveredDevice
+import app.sawatt.core.trainer.LinkState
+import app.sawatt.core.trainer.TrainerConnection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -33,23 +38,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 
-enum class DeviceType { BIKE, HEART_RATE }
-
-data class DiscoveredDevice(
-    val address: String,
-    val name: String,
-    val rssi: Int,
-    val type: DeviceType,
-)
-
-enum class LinkState { CONNECTING, CONNECTED, RECONNECTING }
-
-data class DeviceLink(
-    val device: DiscoveredDevice,
-    val state: LinkState,
-    val firmware: String? = null,
-)
-
 /**
  * Client BLE pour un vélo à capteur de puissance (service Cycling Power) et une ceinture cardio.
  *
@@ -60,32 +48,32 @@ data class DeviceLink(
  * disconnect is followed by a background `autoConnect` that resumes as soon as it advertises again.
  */
 @SuppressLint("MissingPermission") // Callers check permissions; SecurityException is caught below.
-class BleManager(private val context: Context, private val scope: CoroutineScope) {
+class BleManager(private val context: Context, private val scope: CoroutineScope) : TrainerConnection {
 
     private val adapter get() = context.getSystemService(BluetoothManager::class.java)?.adapter
 
     private val _scanning = MutableStateFlow(false)
-    val scanning: StateFlow<Boolean> = _scanning.asStateFlow()
+    override val scanning: StateFlow<Boolean> = _scanning.asStateFlow()
 
     private val _discovered = MutableStateFlow<List<DiscoveredDevice>>(emptyList())
-    val discovered: StateFlow<List<DiscoveredDevice>> = _discovered.asStateFlow()
+    override val discovered: StateFlow<List<DiscoveredDevice>> = _discovered.asStateFlow()
 
     private val _bike = MutableStateFlow<DeviceLink?>(null)
-    val bike: StateFlow<DeviceLink?> = _bike.asStateFlow()
+    override val bike: StateFlow<DeviceLink?> = _bike.asStateFlow()
 
     private val _heartRateSensor = MutableStateFlow<DeviceLink?>(null)
-    val heartRateSensor: StateFlow<DeviceLink?> = _heartRateSensor.asStateFlow()
+    override val heartRateSensor: StateFlow<DeviceLink?> = _heartRateSensor.asStateFlow()
 
     private val _bikeSamples = MutableSharedFlow<BikeSample>(extraBufferCapacity = 64)
-    val bikeSamples: SharedFlow<BikeSample> = _bikeSamples.asSharedFlow()
+    override val bikeSamples: SharedFlow<BikeSample> = _bikeSamples.asSharedFlow()
 
     private val _heartRates = MutableSharedFlow<Int>(extraBufferCapacity = 64)
-    val heartRates: SharedFlow<Int> = _heartRates.asSharedFlow()
+    override val heartRates: SharedFlow<Int> = _heartRates.asSharedFlow()
 
     private val connections = mutableMapOf<DeviceType, Connection>()
     private var scanStopJob: Job? = null
 
-    fun isBluetoothEnabled(): Boolean = adapter?.isEnabled == true
+    override fun isEnabled(): Boolean = adapter?.isEnabled == true
 
     // ---- scanning -----------------------------------------------------------------------
 
@@ -98,7 +86,7 @@ class BleManager(private val context: Context, private val scope: CoroutineScope
         }
     }
 
-    fun startScan(durationMs: Long = 30_000) {
+    override fun startScan(durationMs: Long) {
         val scanner = adapter?.bluetoothLeScanner ?: return
         if (_scanning.value) return
         // Keep devices we are connected to; drop stale results.
@@ -121,7 +109,7 @@ class BleManager(private val context: Context, private val scope: CoroutineScope
         }
     }
 
-    fun stopScan() {
+    override fun stopScan() {
         scanStopJob?.cancel()
         if (!_scanning.value) return
         try {
@@ -161,8 +149,7 @@ class BleManager(private val context: Context, private val scope: CoroutineScope
 
     private fun linkFlow(type: DeviceType) = if (type == DeviceType.BIKE) _bike else _heartRateSensor
 
-    /** [keepScanning] lets auto-connect of a remembered bike still find the remembered strap. */
-    fun connect(device: DiscoveredDevice, keepScanning: Boolean = false) {
+    override fun connect(device: DiscoveredDevice, keepScanning: Boolean) {
         if (!keepScanning) stopScan()
         disconnect(device.type)
         val btDevice = adapter?.getRemoteDevice(device.address) ?: return
@@ -172,12 +159,12 @@ class BleManager(private val context: Context, private val scope: CoroutineScope
         connection.open(autoConnect = false)
     }
 
-    fun disconnect(type: DeviceType) {
+    override fun disconnect(type: DeviceType) {
         connections.remove(type)?.close()
         linkFlow(type).value = null
     }
 
-    fun disconnectAll() = DeviceType.entries.forEach(::disconnect)
+    override fun disconnectAll() = DeviceType.entries.forEach(::disconnect)
 
     private inner class Connection(val device: DiscoveredDevice, private val btDevice: BluetoothDevice) {
         private var gatt: BluetoothGatt? = null

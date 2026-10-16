@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sawatt.AppContainer
-import app.sawatt.ble.LinkState
+import app.sawatt.core.trainer.LinkState
 import app.sawatt.core.model.UnitSystem
 import app.sawatt.core.workout.CurrentInterval
 import app.sawatt.core.workout.IntervalKind
@@ -80,15 +80,15 @@ fun WorkoutScreen(
     val readings by controller.readings.collectAsStateWithLifecycle()
     val app by container.settings.app.collectAsStateWithLifecycle()
     val profile by container.settings.profile.collectAsStateWithLifecycle()
-    val bike by container.ble.bike.collectAsStateWithLifecycle()
-    val hr by container.ble.heartRateSensor.collectAsStateWithLifecycle()
+    val bike by container.trainer.bike.collectAsStateWithLifecycle()
+    val hr by container.trainer.heartRateSensor.collectAsStateWithLifecycle()
     val plans by container.plans.plans.collectAsStateWithLifecycle()
     val plan: WorkoutPlan? = state.plan ?: planId?.let { id -> plans.firstOrNull { it.id == id } }
     var confirmDiscard by remember { mutableStateOf(false) }
 
     KeepScreenOn(app.keepScreenOn && state.status != WorkoutStatus.IDLE)
 
-    val bikeOk = app.simulateBike || bike?.state == LinkState.CONNECTED
+    val bikeOk = bike?.state == LinkState.CONNECTED
     Scaffold(
         topBar = {
             SawattTopBar(plan?.name ?: "Free ride", onBack) {
@@ -97,7 +97,7 @@ fun WorkoutScreen(
                 }
                 Icon(
                     Icons.Default.Favorite, "Heart rate",
-                    tint = if (app.simulateBike || hr?.state == LinkState.CONNECTED) SawattColors.HeartRed else Color.Gray,
+                    tint = if (hr?.state == LinkState.CONNECTED) SawattColors.HeartRed else Color.Gray,
                     modifier = Modifier.padding(end = 12.dp),
                 )
             }
