@@ -14,6 +14,7 @@ import app.sawatt.core.workout.WorkoutSession
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
@@ -87,6 +88,47 @@ class WorkoutSessionTest {
         assertEquals(9, record.summary.durationSec)
         assertEquals(9, samples.powerW.size)
         assertFalse(record.intervals.any { it.endedEarly })
+    }
+
+    @Test
+    fun `ftp percentage targets are resolved with the session ftp`() {
+        val plan = WorkoutPlan(
+            name = "sweet spot",
+            steps = listOf(Block("Sweet spot", 2, targetFtpPercent = 90), Block("Easy", 2, 120)),
+        )
+        val s = WorkoutSession(plan, weightKg = 75.0, ftpW = 250.0, startEpochMs = 0)
+        val live = s.snapshot()
+        assertEquals(225, live.current.targetPowerW)
+        assertEquals(90, live.current.targetFtpPercent)
+        assertEquals("120 W", live.next!!.block.targetLabel(live.ftpW))
+
+        s.ride(4, power = 225)
+        val intervals = s.finish().first.intervals
+        assertEquals(225, intervals[0].targetPowerW)
+        assertEquals(90, intervals[0].targetFtpPercent)
+        assertEquals(120, intervals[1].targetPowerW)
+        assertNull(intervals[1].targetFtpPercent)
+    }
+
+    @Test
+    fun `block target labels`() {
+        assertEquals("250 W", Block("A", 60, 250).targetLabel(200.0))
+        assertEquals("75% FTP", Block("A", 60, targetFtpPercent = 75).targetLabel())
+        assertEquals("75% FTP (188 W)", Block("A", 60, targetFtpPercent = 75).targetLabel(250.0))
+    }
+
+    @Test
+    fun `a block needs exactly one power target`() {
+        assertThrows(IllegalArgumentException::class.java) { Block("None", 60) }
+        assertThrows(IllegalArgumentException::class.java) { Block("Both", 60, 200, targetFtpPercent = 80) }
+    }
+
+    @Test
+    fun `plans saved before ftp percentages still load`() {
+        val json = """{"id":"a","name":"old","steps":[{"type":"block","name":"X","durationSec":60,"targetPowerW":200,"targetCadenceRpm":null}]}"""
+        val block = StorageJson.decodeFromString(WorkoutPlan.serializer(), json).steps.single() as Block
+        assertEquals(200, block.targetPowerW)
+        assertNull(block.targetFtpPercent)
     }
 
     @Test

@@ -15,7 +15,8 @@ block, whether you are on target.
 ## What you can do with SaWatt
 
 ### Ride structured workouts
-- Build your own sessions from blocks: duration, target power and, if you want, target cadence.
+- Build your own sessions from blocks: duration, target power in watts or as a percentage of your
+  FTP, and, if you want, target cadence. Percentage targets follow your FTP as it improves.
 - Repeat sets in one tap: `10' warm-up → 3 × [15' @ 250 W + 5' recovery] → 10' cool-down`.
 - During the ride, see the current target, the time left in the interval, a progress bar and what
   comes next.
@@ -95,7 +96,6 @@ attached to each pull request's CI run, or build it yourself: see
 
 ## Roadmap
 
-- Targets as a percentage of FTP, in addition to watts.
 - French interface.
 - Direct upload to Strava.
 - Data backup and restore.
