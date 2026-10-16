@@ -12,4 +12,5 @@ Points that need particular care:
 - **Documentation**: English. The README is a user-facing product page; developer content goes in CONTRIBUTING.md.
 - **Conversation with the maintainer**: French.
 - **Architecture**: workout logic (`core`) never depends on the Bluetooth layer. Unit tests never use real hardware.
+- **Brand name**: always spelled **SaWatt** in user-facing text and documentation. Technical identifiers keep their own casing (`app.sawatt`, `SawattTheme`, …).
 - **No mention of "BODY BIKE"** anywhere in the repository. Reverse-engineering notes stay outside the repository.

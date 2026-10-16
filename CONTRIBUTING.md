@@ -1,6 +1,6 @@
-# Contributing to Sawatt
+# Contributing to SaWatt
 
-This guide is for developers: how to build Sawatt, how the code is organised, and the rules every
+This guide is for developers: how to build SaWatt, how the code is organised, and the rules every
 change follows. For what the app does, see the [README](README.md).
 
 ## Development setup

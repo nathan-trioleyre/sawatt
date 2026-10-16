@@ -1,10 +1,10 @@
 package app.sawatt.core.ble
 
 /**
- * 16-bit Bluetooth SIG identifiers used by Sawatt.
+ * 16-bit Bluetooth SIG identifiers used by SaWatt.
  *
  * The bike is a standard Cycling Power sensor; heart-rate straps are standard HRM sensors.
- * Sawatt only reads: it never writes to the bike.
+ * SaWatt only reads: it never writes to the bike.
  */
 object GattIds {
     const val SERVICE_CYCLING_POWER = 0x1818

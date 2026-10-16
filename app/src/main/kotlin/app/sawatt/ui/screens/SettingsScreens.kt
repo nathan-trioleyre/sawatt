@@ -98,7 +98,7 @@ fun SettingsScreen(container: AppContainer, onBack: () -> Unit) {
             SectionCard {
                 Text("About", style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "Sawatt: structured interval training for indoor bikes and power meters. " +
+                    "SaWatt: structured interval training for indoor bikes and power meters. " +
                         "It reads the bike over the standard Bluetooth Cycling Power service and never writes to it.",
                     style = MaterialTheme.typography.bodySmall,
                 )
