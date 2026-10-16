@@ -18,6 +18,11 @@ class Beeper {
         tone?.startTone(ToneGenerator.TONE_PROP_BEEP2, 500)
     }
 
+    /** 3, 2, 1 seconds before a planned block ends: short and lower than [transition]. */
+    fun countdown() {
+        tone?.startTone(ToneGenerator.TONE_PROP_BEEP, 150)
+    }
+
     /** Last planned block done. */
     fun planCompleted() {
         tone?.startTone(ToneGenerator.TONE_CDMA_ALERT_CALL_GUARD, 900)

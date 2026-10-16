@@ -90,6 +90,25 @@ class WorkoutSessionTest {
     }
 
     @Test
+    fun `countdown is announced 3, 2 and 1 seconds before a planned block ends`() {
+        val plan = WorkoutPlan(name = "countdown", steps = listOf(Block("Long", 10, 200), Block("Next", 10, 100)))
+        val s = WorkoutSession(plan, 75.0, 200.0, 0)
+        val perSecond = (1..10).map { s.ride(1, power = 200) }
+        assertTrue(perSecond.take(6).all { it.isEmpty() })
+        assertEquals(
+            listOf(3, 2, 1),
+            perSecond.subList(6, 9).map { (it.single() as SessionEvent.Countdown).secondsLeft },
+        )
+        assertTrue(perSecond[9].single() is SessionEvent.IntervalChanged)
+    }
+
+    @Test
+    fun `free ride laps have no countdown`() {
+        val s = WorkoutSession(null, 75.0, 200.0, 0)
+        assertTrue(s.ride(30, power = 200).isEmpty())
+    }
+
+    @Test
     fun `lap skips a planned block and is marked ended early`() {
         val s = WorkoutSession(shortPlan, 75.0, 200.0, 0)
         assertTrue("lap on empty interval is ignored", s.lap().isEmpty())

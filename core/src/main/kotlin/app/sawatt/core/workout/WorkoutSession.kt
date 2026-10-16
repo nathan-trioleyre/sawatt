@@ -61,6 +61,9 @@ sealed interface SessionEvent {
 
     /** The last planned block has been completed; the session continues as a free ride. */
     data object PlanCompleted : SessionEvent
+
+    /** [secondsLeft] (3, 2 or 1) seconds remain before the current planned block ends. */
+    data class Countdown(val secondsLeft: Int) : SessionEvent
 }
 
 /** Second-by-second channel data recorded for charts. */
@@ -148,11 +151,13 @@ class WorkoutSession(
         cadenceTrace += c
         hrTrace += hr
 
-        val planned = current.planned
-        if (planned != null && current.elapsedSec >= planned.block.durationSec) {
-            return advance(endedEarly = false)
+        val planned = current.planned ?: return emptyList()
+        val remaining = planned.block.durationSec - current.elapsedSec
+        return when {
+            remaining <= 0 -> advance(endedEarly = false)
+            remaining <= COUNTDOWN_SECONDS -> listOf(SessionEvent.Countdown(remaining))
+            else -> emptyList()
         }
-        return emptyList()
     }
 
     /**
@@ -298,5 +303,8 @@ class WorkoutSession(
 
     companion object {
         const val STALE_TICKS = 3
+
+        /** Number of seconds announced before the end of a planned block. */
+        const val COUNTDOWN_SECONDS = 3
     }
 }
