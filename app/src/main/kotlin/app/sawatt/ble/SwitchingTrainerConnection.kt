@@ -16,8 +16,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
- * Délègue à la connexion réelle ou à la connexion simulée selon [useSimulated] (réglage « vélo
- * simulé »). Le reste de l'application ne voit qu'une seule [TrainerConnection].
+ * Delegates to the real or the simulated connection depending on [useSimulated] (the "Simulated
+ * bike" setting). The rest of the app only sees a single [TrainerConnection].
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class SwitchingTrainerConnection(
@@ -41,7 +41,7 @@ class SwitchingTrainerConnection(
     override val heartRates: Flow<Int> = useSimulated.flatMapLatest { if (it) simulated.heartRates else real.heartRates }
 
     init {
-        // Quand on change de mode, on libère les appareils de l'autre implémentation.
+        // When the mode changes, release the devices held by the other implementation.
         scope.launch {
             useSimulated.drop(1).collect { simulatedNow ->
                 val previous = if (simulatedNow) real else simulated

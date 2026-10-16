@@ -1,10 +1,10 @@
 package app.sawatt.core.ble
 
 /**
- * Identifiants Bluetooth SIG 16 bits utilisés par Sawatt.
+ * 16-bit Bluetooth SIG identifiers used by Sawatt.
  *
- * Le vélo est un capteur Cycling Power standard ; les ceintures cardio sont des capteurs HRM
- * standard. Sawatt ne fait que lire : il n'écrit jamais sur le vélo.
+ * The bike is a standard Cycling Power sensor; heart-rate straps are standard HRM sensors.
+ * Sawatt only reads: it never writes to the bike.
  */
 object GattIds {
     const val SERVICE_CYCLING_POWER = 0x1818
@@ -18,7 +18,7 @@ object GattIds {
 
     const val DESCRIPTOR_CCCD = 0x2902
 
-    /** Noms annoncés par certains vélos qui n'annoncent pas toujours leur service : "SMART+ #1234", "PHANTOM+ #1234". */
+    /** Names advertised by some bikes that do not always advertise their service: "SMART+ #1234", "PHANTOM+ #1234". */
     val BIKE_NAME_PREFIXES = listOf("SMART+ #", "PHANTOM+ #")
 
     /** Expands a 16-bit SIG id to its full 128-bit UUID string. */

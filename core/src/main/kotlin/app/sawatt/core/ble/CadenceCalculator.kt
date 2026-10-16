@@ -4,7 +4,7 @@ package app.sawatt.core.ble
 data class BikeSample(val powerW: Int, val cadenceRpm: Int)
 
 /**
- * Turns raw Cycling Power notifications into power + cadence, selon les règles suivantes :
+ * Turns raw Cycling Power notifications into power + cadence, with these rules:
  *
  *  - notifications closer than 500 ms to the previously accepted one are dropped;
  *  - cadence = 60 * Δrevolutions * 1024 / Δeventtime (event time wraps at 65536);
@@ -13,7 +13,7 @@ data class BikeSample(val powerW: Int, val cadenceRpm: Int)
  *  - a cadence above 300 rpm is treated as a glitch and the previous value is kept;
  *  - the very first packet only primes the counters and produces no sample.
  *
- * Les débordements du compteur de tours et de l'horodatage (65536) sont gérés.
+ * Wrap-around of the revolution counter and of the event time (65536) is handled.
  */
 class CadenceCalculator(private val minIntervalMs: Long = 500) {
     private var lastAcceptedAt = Long.MIN_VALUE

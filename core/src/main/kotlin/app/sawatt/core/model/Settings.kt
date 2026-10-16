@@ -21,8 +21,8 @@ object LocalDateSerializer : KSerializer<LocalDate> {
 }
 
 /**
- * Profil du cycliste. Valeurs par défaut : homme, né le 1980-01-01, 75 kg, 182 cm,
- * niveau d'entraînement 0, FTP et FC max estimées.
+ * Rider profile. Defaults: male, born 1980-01-01, 75 kg, 182 cm, training level 0, FTP and max
+ * heart rate estimated.
  */
 @Serializable
 data class UserProfile(
@@ -43,11 +43,11 @@ data class UserProfile(
 
 @Serializable
 data class AppSettings(
-    /** Génère de fausses données vélo + cardio (mode démo). */
+    /** Generate fake bike + heart-rate data (demo mode). */
     val simulateBike: Boolean = false,
     val transitionBeep: Boolean = true,
     val keepScreenOn: Boolean = true,
-    /** Adresse de la ceinture cardio à reconnecter automatiquement après un scan. */
+    /** Address of the heart-rate strap to reconnect automatically after a scan. */
     val defaultHrSensor: String? = null,
     /** Address of the last bike used, auto-selected after a scan. */
     val defaultBike: String? = null,

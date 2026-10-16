@@ -5,12 +5,12 @@ on:
   push:
     branches: [main]
 
-# Moindre privilège : lecture seule par défaut, chaque job n'élargit que si nécessaire.
+# Least privilege: read-only by default; a job only widens what it needs.
 permissions:
   contents: read
 
-# Un nouveau push sur une PR annule le run précédent. Sur main, chaque run va au bout pour
-# alimenter le cache Gradle utilisé par les PR.
+# A new push to a PR cancels its previous run. On main every run completes, so that it fills
+# the Gradle cache used by pull requests.
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -19,7 +19,7 @@ env:
   JAVA_VERSION: "21"
 
 jobs:
-  # Détecte si la PR touche autre chose que de la documentation.
+  # Detects whether the PR touches anything besides documentation.
   changes:
     name: changes
     runs-on: ubuntu-latest
@@ -58,11 +58,11 @@ jobs:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
 
-      # Valide le wrapper Gradle et met en cache Gradle User Home (dépendances, cache de build).
-      # Seuls les runs sur main écrivent le cache ; les PR le lisent.
+      # Validates the Gradle wrapper and caches Gradle User Home (dependencies, build cache).
+      # Only runs on main write the cache; pull requests read it.
       - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
         with:
-          # Gratuit pour les dépôts publics ; passer à `basic` (open source) si le dépôt devient privé.
+          # Free for public repositories; switch to `basic` (open source) if the repository goes private.
           cache-provider: enhanced
           add-job-summary: on-failure
 
@@ -101,7 +101,7 @@ jobs:
       - name: Install Android SDK packages
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;35.0.0" > /dev/null
 
-      # Lint et APK dans la même invocation : ils partagent la compilation de l'app.
+      # Lint and APK in one invocation: they share the app compilation.
       - name: Lint and assemble
         run: ./gradlew :app:lintDebug :app:assembleDebug
 
@@ -121,8 +121,8 @@ jobs:
           path: app/build/reports/lint-results-debug.html
           retention-days: 7
 
-  # Vérification unique exigée par la protection de main : réussit si aucun job n'a échoué
-  # (un job sauté, par exemple pour une PR de documentation, compte comme réussi).
+  # Single check required by main's branch protection: succeeds unless a job failed
+  # (a skipped job, e.g. for a documentation-only PR, counts as a success).
   ci:
     name: ci
     if: always()
@@ -136,6 +136,6 @@ jobs:
         run: |
           echo "$RESULTS"
           if echo "$RESULTS" | grep -qE '"(failure|cancelled)"'; then
-            echo "::error::Au moins un job a échoué ou a été annulé."
+            echo "::error::At least one job failed or was cancelled."
             exit 1
           fi

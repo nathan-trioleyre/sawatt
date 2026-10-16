@@ -8,7 +8,7 @@ import kotlin.math.cbrt
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
-/** Formules d'entraînement : vitesse virtuelle, énergie, estimations FTP / FC max, zones. */
+/** Training formulas: virtual speed, energy, FTP / max heart rate estimates, zones. */
 object RideMath {
     /**
      * Virtual speed in km/h for a given power, solving a cubic drag model:
@@ -71,7 +71,7 @@ object RideMath {
         else -> 4
     }
 
-    /** Libellé de « vitesse » G1..G12 à partir du % de FTP. */
+    /** "Gear" label G1..G12 from % of FTP. */
     fun gearZone(percentFtp: Double): String {
         val p = percentFtp.roundToInt()
         val limits = intArrayOf(26, 56, 62, 69, 76, 83, 91, 98, 106, 121, 151)

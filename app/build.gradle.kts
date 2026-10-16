@@ -35,8 +35,8 @@ android {
 
 androidComponents {
     beforeVariants { variant ->
-        // Les tests unitaires vivent dans :core et l'app n'a pas de tests instrumentés : sans ces
-        // composants vides, le lint n'analyse pas deux jeux de sources inutiles.
+        // Unit tests live in :core and the app has no instrumented tests: without these empty
+        // components, lint no longer analyses two useless source sets.
         variant.enableAndroidTest = false
         variant.enableUnitTest = false
     }

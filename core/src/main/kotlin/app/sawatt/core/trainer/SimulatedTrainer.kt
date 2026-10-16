@@ -16,12 +16,12 @@ import kotlin.math.roundToInt
 import kotlin.random.Random
 
 /**
- * Home trainer et ceinture cardio simulés, sans aucun matériel : sert aux tests unitaires et
- * au mode démo de l'application.
+ * Simulated trainer and heart-rate strap, without any hardware: used by unit tests and by the
+ * app's demo mode.
  *
- * Le cycliste virtuel tend vers [targetPowerW] (180 W par défaut) avec un peu de bruit ; sa
- * cadence et sa fréquence cardiaque suivent la puissance. Les durées passent par `delay`, donc
- * les tests peuvent tout piloter en temps virtuel.
+ * The virtual rider converges towards [targetPowerW] (180 W by default) with some noise; cadence
+ * and heart rate follow the power. All timing goes through `delay`, so tests can drive everything
+ * in virtual time.
  */
 class SimulatedTrainer(
     private val scope: CoroutineScope,
@@ -30,7 +30,7 @@ class SimulatedTrainer(
     private val scanDelayMs: Long = 1_000,
 ) : TrainerConnection {
 
-    /** Puissance visée par le cycliste virtuel ; null = 180 W. */
+    /** Power targeted by the virtual rider; null = 180 W. */
     @Volatile
     var targetPowerW: Int? = null
 
@@ -56,7 +56,7 @@ class SimulatedTrainer(
     private var bikeJob: Job? = null
     private var heartJob: Job? = null
 
-    // État du cycliste virtuel, partagé entre le vélo et la ceinture.
+    // Virtual rider state, shared by the bike and the heart-rate strap.
     private var power = 150.0
     private var cadence = 85.0
     private var heartRate = 110.0
@@ -120,7 +120,7 @@ class SimulatedTrainer(
 
     override fun disconnectAll() = DeviceType.entries.forEach(::disconnect)
 
-    /** Fait évoluer le cycliste virtuel d'un pas vers la cible. */
+    /** Moves the virtual rider one step towards the target. */
     private fun step() {
         val target = (targetPowerW ?: DEFAULT_POWER_W).toDouble()
         power = (power + (target - power) * 0.15 + random.nextDouble(-12.0, 12.0)).coerceAtLeast(0.0)

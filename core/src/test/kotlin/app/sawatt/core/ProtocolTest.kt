@@ -12,7 +12,7 @@ import org.junit.Test
 class ProtocolTest {
     private fun bytes(vararg v: Int) = ByteArray(v.size) { v[it].toByte() }
 
-    /** Drapeaux 0x0030 (données roue + pédalier). */
+    /** Flags 0x0030 (wheel + crank data). */
     private fun cpsPacket(power: Int, wheelRevs: Long, wheelTime: Int, crankRevs: Int, crankTime: Int) = bytes(
         0x30, 0x00,
         power and 0xFF, (power shr 8) and 0xFF,

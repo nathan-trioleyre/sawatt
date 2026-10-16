@@ -97,7 +97,7 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
     }
 
     fun requestScan() {
-        // Le vélo simulé n'utilise pas le Bluetooth : pas de permission à demander.
+        // The simulated bike does not use Bluetooth: no permission to request.
         if (simulated || hasPermissions()) scan() else permissionLauncher.launch(blePermissions + notificationPermission())
     }
 
@@ -132,7 +132,7 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
                 items(discovered.filter { it.address !in connected }, key = { it.address }) { d ->
                     DeviceRow(d) {
                         trainer.connect(d)
-                        // Ne mémorise que les vrais appareils, pour les reconnecter automatiquement.
+                        // Only remember real devices, to reconnect them automatically.
                         if (!simulated) {
                             container.settings.updateApp {
                                 if (d.type == DeviceType.BIKE) it.copy(defaultBike = d.address) else it.copy(defaultHrSensor = d.address)
