@@ -43,7 +43,7 @@ fun HomeScreen(container: AppContainer, nav: NavController) {
     val bike by container.trainer.bike.collectAsStateWithLifecycle()
     val hr by container.trainer.heartRateSensor.collectAsStateWithLifecycle()
 
-    Scaffold(topBar = { SawattTopBar("Sawatt") }) { padding ->
+    Scaffold(topBar = { SawattTopBar("SaWatt") }) { padding ->
         Column(
             Modifier.fillMaxSize().padding(padding).padding(16.dp).verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp),
