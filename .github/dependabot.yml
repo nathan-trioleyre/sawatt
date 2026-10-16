@@ -5,8 +5,12 @@ updates:
     directory: /
     schedule:
       interval: monthly
+    # Only propose a release once it is at least two weeks old: broken or compromised releases are
+    # usually caught and pulled within days.
+    cooldown:
+      default-days: 14
+    # One pull request per action, titled "ci: bump <action> from <old> to <new>". Dependabot
+    # copies the repository's lowercase commit style for single updates, whereas grouped pull
+    # requests always start with "Bump" and exceed the 72-character title limit.
     commit-message:
       prefix: ci
-    groups:
-      github-actions:
-        patterns: ["*"]
