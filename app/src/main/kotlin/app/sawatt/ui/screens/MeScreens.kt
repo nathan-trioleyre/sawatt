@@ -35,6 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -168,7 +169,8 @@ fun MeScreen(container: AppContainer, nav: NavHostController) {
 @Composable
 private fun LanguageRow() {
     val activity = LocalActivity.current ?: return
-    val current = remember { AppLanguage.current(activity) }
+    // Re-read when the configuration changes: the language can also be changed from the system settings.
+    var current by remember(LocalConfiguration.current) { mutableStateOf(AppLanguage.current(activity)) }
     var menuOpen by remember { mutableStateOf(false) }
     Box {
         GroupRow(
@@ -183,7 +185,10 @@ private fun LanguageRow() {
                     trailingIcon = if (tag == current) ({ Icon(Icons.Default.Check, contentDescription = null, tint = SawattColors.Accent) }) else null,
                     onClick = {
                         menuOpen = false
-                        if (tag != current) AppLanguage.set(activity, tag)
+                        if (tag != current) {
+                            AppLanguage.set(activity, tag)
+                            current = tag
+                        }
                     },
                 )
             }
