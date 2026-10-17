@@ -211,7 +211,6 @@ private fun Idle(plan: WorkoutPlan?, ftpW: Double, readings: SensorReadings, bik
     )
     if (plan != null) {
         SectionCard(Modifier.fillMaxWidth(), spacing = 10.dp) {
-            Text(plan.name, style = MaterialTheme.typography.titleMedium)
             PlanProfile(plan.flatten(), ftpW, height = 56.dp)
             plan.flatten().forEach { p ->
                 val pct = p.block.targetFtpPercent?.toDouble() ?: if (ftpW > 0) p.block.targetWatts(ftpW) * 100 / ftpW else 0.0
@@ -305,7 +304,7 @@ private fun Live(live: LiveState, plan: WorkoutPlan?, readings: SensorReadings, 
         Text(stringResource(R.string.workout_plan_completed), style = MaterialTheme.typography.bodyMedium, color = SawattColors.OnTarget)
     }
 
-    SectionCard(Modifier.fillMaxWidth()) {
+    Column(Modifier.fillMaxWidth().padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         MetricLabel(stringResource(R.string.workout_whole_workout))
         val s = live.session
         Row {
@@ -326,24 +325,19 @@ private fun Live(live: LiveState, plan: WorkoutPlan?, readings: SensorReadings, 
 @Composable
 private fun IntervalHeader(c: CurrentInterval, live: LiveState) {
     Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.Bottom) {
-        Column(Modifier.weight(1f)) {
-            val target = c.targetPowerW
-            val zone = c.targetFtpPercent?.toDouble() ?: if (target != null && live.ftpW > 0) target * 100 / live.ftpW else null
-            MetricLabel(
-                if (c.kind == IntervalKind.PLANNED) {
-                    stringResource(R.string.workout_interval_of, c.index, live.plannedCount)
-                } else {
-                    stringResource(R.string.workout_lap_n, c.index)
-                },
-                zone?.let(::zoneColor) ?: SawattColors.Accent,
-            )
+        val target = c.targetPowerW
+        val zone = c.targetFtpPercent?.toDouble() ?: if (target != null && live.ftpW > 0) target * 100 / live.ftpW else null
+        Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+            // The zone colour, which the removed "Interval 1 of 12" line used to carry.
+            Box(Modifier.size(10.dp).clip(CircleShape).background(zone?.let(::zoneColor) ?: SawattColors.Accent))
+            Spacer(Modifier.width(10.dp))
             Text(intervalName(c.name, c.kind), style = MaterialTheme.typography.titleLarge, fontSize = 26.sp)
         }
-        if (c.targetPowerW != null) {
-            SectionCard(padding = 10.dp, spacing = 0.dp) {
+        if (target != null) {
+            Column(horizontalAlignment = Alignment.End) {
                 MetricLabel(stringResource(R.string.workout_target))
                 Metric(
-                    c.targetPowerW.toString(),
+                    target.toString(),
                     unit = "W" + (c.targetFtpPercent?.let { " · $it%" } ?: "") +
                         (c.targetCadenceRpm?.let { " · $it ${stringResource(R.string.workout_unit_rpm)}" } ?: ""),
                     size = 24.sp,
