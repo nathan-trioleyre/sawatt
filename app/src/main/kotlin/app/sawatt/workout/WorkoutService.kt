@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
 class WorkoutService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLanguage.wrap(base))
+    override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLanguage.localized(base))
 
     override fun onBind(intent: Intent?): IBinder? = null
 
