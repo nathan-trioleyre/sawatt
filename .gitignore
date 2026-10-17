@@ -5,3 +5,7 @@ local.properties
 *.iml
 .kotlin/
 captures/
+
+# Local Claude Code state: agent worktrees and personal settings
+.claude/worktrees/
+.claude/settings.local.json
