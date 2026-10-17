@@ -16,10 +16,12 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import app.sawatt.SawattApp
+import app.sawatt.AppLanguage
 import app.sawatt.MainActivity
 import app.sawatt.R
+import app.sawatt.SawattApp
 import app.sawatt.ui.formatDuration
+import app.sawatt.ui.intervalName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -34,6 +36,8 @@ import kotlinx.coroutines.launch
  */
 class WorkoutService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLanguage.wrap(base))
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -60,7 +64,7 @@ class WorkoutService : Service() {
                     val c = s.live?.current ?: return@map getString(R.string.workout_notification_running)
                     val time = c.remainingSec?.let { getString(R.string.workout_notification_left, formatDuration(it)) }
                         ?: formatDuration(c.elapsedSec)
-                    getString(R.string.workout_notification_text, c.name, time, c.stats.avgPowerW.toInt())
+                    getString(R.string.workout_notification_text, intervalName(this@WorkoutService, c.name, c.kind), time, c.stats.avgPowerW.toInt())
                 }
                 .distinctUntilChanged()
                 .collect { manager.notify(NOTIFICATION_ID, build(it)) }

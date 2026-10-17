@@ -1,7 +1,10 @@
 package app.sawatt.ui.screens
 
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,8 +15,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -35,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import app.sawatt.AppContainer
+import app.sawatt.AppLanguage
 import app.sawatt.R
 import app.sawatt.core.model.Gender
 import app.sawatt.core.model.UnitSystem
@@ -56,6 +64,7 @@ import app.sawatt.ui.components.SectionCard
 import app.sawatt.ui.components.SwitchRow
 import app.sawatt.ui.theme.SawattColors
 import java.time.LocalDate
+import java.util.Locale
 import kotlin.math.roundToInt
 
 /** The "Me" tab: profile numbers, devices and settings. */
@@ -132,6 +141,8 @@ fun MeScreen(container: AppContainer, nav: NavHostController) {
                 },
             )
             GroupDivider()
+            LanguageRow()
+            GroupDivider()
             SwitchRow(stringResource(R.string.me_simulated_bike), app.simulateBike, stringResource(R.string.me_simulated_bike_hint)) { v -> update { it.copy(simulateBike = v) } }
             GroupDivider()
             GroupRow(stringResource(R.string.me_about), onClick = { aboutOpen = !aboutOpen })
@@ -152,6 +163,37 @@ fun MeScreen(container: AppContainer, nav: NavHostController) {
         }
     }
 }
+
+/** Follow the phone, or force one of the [AppLanguage.supported] languages. */
+@Composable
+private fun LanguageRow() {
+    val activity = LocalActivity.current ?: return
+    val current = remember { AppLanguage.current(activity) }
+    var menuOpen by remember { mutableStateOf(false) }
+    Box {
+        GroupRow(
+            stringResource(R.string.me_language),
+            value = current?.let { languageName(it) } ?: stringResource(R.string.me_language_system),
+            onClick = { menuOpen = true },
+        )
+        DropdownMenu(menuOpen, onDismissRequest = { menuOpen = false }, modifier = Modifier.background(SawattColors.SurfaceHigh)) {
+            (listOf(null) + AppLanguage.supported).forEach { tag ->
+                DropdownMenuItem(
+                    text = { Text(tag?.let { languageName(it) } ?: stringResource(R.string.me_language_system)) },
+                    trailingIcon = if (tag == current) ({ Icon(Icons.Default.Check, contentDescription = null, tint = SawattColors.Accent) }) else null,
+                    onClick = {
+                        menuOpen = false
+                        if (tag != current) AppLanguage.set(activity, tag)
+                    },
+                )
+            }
+        }
+    }
+}
+
+/** A language's name written in that language, as language pickers usually show it. */
+private fun languageName(tag: String): String =
+    Locale.forLanguageTag(tag).let { it.getDisplayLanguage(it).replaceFirstChar { c -> c.titlecase(it) } }
 
 @Composable
 private fun ProfileNumber(

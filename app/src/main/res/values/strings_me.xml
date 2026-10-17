@@ -29,6 +29,8 @@
     <string name="me_units">Units</string>
     <string name="me_units_metric">Metric</string>
     <string name="me_units_imperial">Imperial</string>
+    <string name="me_language">Language</string>
+    <string name="me_language_system">Phone language</string>
     <string name="me_simulated_bike">Simulated bike</string>
     <string name="me_simulated_bike_hint">Try SaWatt without a bike</string>
     <string name="me_about">About SaWatt</string>

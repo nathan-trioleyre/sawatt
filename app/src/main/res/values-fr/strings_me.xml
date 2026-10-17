@@ -29,6 +29,8 @@
     <string name="me_units">Unités</string>
     <string name="me_units_metric">Métrique</string>
     <string name="me_units_imperial">Impérial</string>
+    <string name="me_language">Langue</string>
+    <string name="me_language_system">Langue du téléphone</string>
     <string name="me_simulated_bike">Vélo simulé</string>
     <string name="me_simulated_bike_hint">Essayer SaWatt sans vélo</string>
     <string name="me_about">À propos de SaWatt</string>
