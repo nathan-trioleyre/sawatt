@@ -41,16 +41,16 @@
     <!-- Profile -->
     <string name="me_profile">Profil</string>
     <string name="me_training">Entraînement</string>
-    <string name="me_ftp_setting">FTP (W) — 0 = estimation</string>
-    <string name="me_estimated_watts">Estimée : %1$d W</string>
-    <string name="me_max_hr_setting">Fréquence cardiaque max (bpm) — 0 = estimation</string>
-    <string name="me_estimated_bpm">Estimée : %1$d bpm</string>
+    <string name="me_ftp_setting">FTP (W)</string>
+    <string name="me_estimated_watts">Laisse vide pour utiliser l\'estimation : %1$d W</string>
+    <string name="me_max_hr_setting">FC max (bpm)</string>
+    <string name="me_estimated_bpm">Laisse vide pour utiliser l\'estimation : %1$d bpm</string>
     <string name="me_training_per_week">Entraînement cardio par semaine</string>
     <string name="me_you">Toi</string>
     <string name="me_gender">Sexe</string>
     <string name="me_male">Homme</string>
     <string name="me_female">Femme</string>
-    <string name="me_birth_date">Date de naissance (AAAA-MM-JJ)</string>
+    <string name="me_birth_date">Date de naissance</string>
     <string name="me_weight_setting">Poids (kg)</string>
     <string name="me_height_setting">Taille (cm)</string>
 

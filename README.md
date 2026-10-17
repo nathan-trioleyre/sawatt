@@ -42,7 +42,7 @@ block, whether you are on target.
 - Weekly, monthly and yearly summaries: time, distance, calories, average and max power.
 
 ### Train on your numbers
-- Enter your FTP and max heart rate, or let SaWatt estimate them from your profile.
+- On first launch, SaWatt asks for your profile (gender, date of birth, weight, height, weekly training) and estimates your FTP and max heart rate from it, unless you enter them. Change it anytime in **Me → Profile**.
 - Or measure your FTP with the guided **FTP test** (Me → Test your FTP): a 66-minute session with
   20 minutes all out, then save the result to your profile in one tap.
 - Metric or imperial units.

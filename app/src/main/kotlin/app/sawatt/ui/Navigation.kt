@@ -2,6 +2,7 @@ package app.sawatt.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.HorizontalDivider
@@ -19,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -34,6 +36,7 @@ import app.sawatt.ui.screens.DevicesScreen
 import app.sawatt.ui.screens.HistoryDetailScreen
 import app.sawatt.ui.screens.HistoryScreen
 import app.sawatt.ui.screens.MeScreen
+import app.sawatt.ui.screens.OnboardingScreen
 import app.sawatt.ui.screens.PlanEditorScreen
 import app.sawatt.ui.screens.PlansScreen
 import app.sawatt.ui.screens.ProfileScreen
@@ -80,6 +83,17 @@ fun NavHostController.openTab(route: String) = navigate(route) {
 
 @Composable
 fun SawattNavHost(container: AppContainer, nav: NavHostController = rememberNavController()) {
+    val profileSaved by container.settings.profileSaved.collectAsStateWithLifecycle()
+    when (profileSaved) {
+        // Still reading the settings: the background alone, rather than a flash of the wrong screen.
+        null -> Box(Modifier.fillMaxSize().background(SawattColors.Background))
+        false -> Box(Modifier.fillMaxSize().background(SawattColors.Background)) { OnboardingScreen(container) }
+        true -> AppScreens(container, nav)
+    }
+}
+
+@Composable
+private fun AppScreens(container: AppContainer, nav: NavHostController) {
     val entry by nav.currentBackStackEntryAsState()
     val route = entry?.destination?.route
 
