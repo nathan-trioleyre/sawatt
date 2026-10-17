@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ftp_test_name">FTP test</string>
+    <string name="ftp_step_warm_up">Warm-up</string>
+    <string name="ftp_step_spin_up">Spin-up</string>
+    <string name="ftp_step_easy">Easy</string>
+    <string name="ftp_step_opener">Opener</string>
+    <string name="ftp_step_recovery">Recovery</string>
+    <string name="ftp_step_all_out">All out</string>
+    <string name="ftp_step_cool_down">Cool-down</string>
+
+    <string name="ftp_target_all_out">All out</string>
+    <string name="ftp_all_out_hint">Hold the highest power you can sustain</string>
+
+    <string name="ftp_entry_title">Test your FTP</string>
+    <string name="ftp_entry_subtitle">66 min guided test, with 20 min all out</string>
+
+    <string name="ftp_result_title">FTP test</string>
+    <string name="ftp_result_avg">20 min average</string>
+    <string name="ftp_result_estimate">Estimated FTP</string>
+    <string name="ftp_result_explain">Your FTP is 95% of the power you held over the 20-minute effort.</string>
+    <string name="ftp_result_current">Current FTP: %1$d W</string>
+    <string name="ftp_result_set">Set as my FTP (%1$d W → %2$d W)</string>
+    <string name="ftp_result_saved">Saved as your FTP</string>
+    <string name="ftp_result_incomplete">Test incomplete: the 20-minute effort was not ridden to the end, so no FTP can be estimated.</string>
+</resources>

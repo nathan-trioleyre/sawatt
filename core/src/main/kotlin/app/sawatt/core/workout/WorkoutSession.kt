@@ -27,6 +27,8 @@ data class IntervalRecord(
     val plannedDurationSec: Int? = null,
     /** True when a planned block was cut short with the Lap button or by finishing the workout. */
     val endedEarly: Boolean = false,
+    /** True for an all-out block, which has no power target. */
+    val allOut: Boolean = false,
     val stats: StatsSummary,
 )
 
@@ -41,6 +43,7 @@ data class CurrentInterval(
     val targetCadenceRpm: Int?,
     val targetFtpPercent: Int?,
     val stats: StatsSummary,
+    val allOut: Boolean = false,
 ) {
     val remainingSec: Int? get() = plannedDurationSec?.let { (it - elapsedSec).coerceAtLeast(0) }
 }
@@ -257,6 +260,7 @@ class WorkoutSession(
             targetFtpPercent = open.planned?.block?.targetFtpPercent,
             plannedDurationSec = open.planned?.block?.durationSec,
             endedEarly = endedEarly,
+            allOut = open.planned?.block?.allOut == true,
             stats = open.stats.summary(),
         )
         completed += record
@@ -273,6 +277,7 @@ class WorkoutSession(
         targetCadenceRpm = planned?.block?.targetCadenceRpm,
         targetFtpPercent = planned?.block?.targetFtpPercent,
         stats = stats.summary(),
+        allOut = planned?.block?.allOut == true,
     )
 
     /**

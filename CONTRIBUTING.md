@@ -61,6 +61,10 @@ HR strap ─BLE──┘ (BleManager or       (1 Hz clock,          (interval   
 - Pausing stops the clock. With no data for 3 s, power drops to 0 W.
 - When a workout ends, the summary and per-interval statistics are saved to `history/index.json`,
   and the second-by-second trace to `history/<id>.samples.json`.
+- The FTP test (`FtpTest` in `core`) is a built-in plan with the fixed id `builtin:ftp-test`: it
+  is built on demand with block names in the app language and never stored with the user's plans.
+  Its 20-minute effort is an `allOut` block, with no power target; the estimated FTP is 95% of
+  that block's average power.
 
 ## Workflow: GitHub Flow
 
