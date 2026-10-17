@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
+import app.sawatt.AppLanguage
 import app.sawatt.R
 import app.sawatt.core.export.FitWriter
 import app.sawatt.core.export.TcxWriter
 import app.sawatt.core.workout.WorkoutRecord
+import app.sawatt.ui.intervalName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -34,9 +36,10 @@ class WorkoutExporter(private val context: Context, private val history: History
             // Only the latest export is kept: the share target copies what it needs.
             dir.listFiles()?.forEach { it.delete() }
             val file = File(dir, fileName(record, format))
+            val translated = translated(record)
             when (format) {
-                ExportFormat.FIT -> file.writeBytes(FitWriter.write(record, samples))
-                ExportFormat.TCX -> file.writeText(TcxWriter.write(record, samples))
+                ExportFormat.FIT -> file.writeBytes(FitWriter.write(translated, samples))
+                ExportFormat.TCX -> file.writeText(TcxWriter.write(translated, samples))
             }
             file
         }
@@ -48,7 +51,13 @@ class WorkoutExporter(private val context: Context, private val history: History
             .setType(format.mimeType)
             .putExtra(Intent.EXTRA_STREAM, uri)
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        return Intent.createChooser(send, context.getString(R.string.export_chooser, format.label))
+        return Intent.createChooser(send, AppLanguage.localized(context).getString(R.string.export_chooser, format.label))
+    }
+
+    /** [record] with its lap names in the app language, as the history shows them. */
+    private fun translated(record: WorkoutRecord): WorkoutRecord {
+        val localized = AppLanguage.localized(context)
+        return record.copy(intervals = record.intervals.map { it.copy(name = intervalName(localized, it.name, it.kind)) })
     }
 
     private fun fileName(record: WorkoutRecord, format: ExportFormat): String {

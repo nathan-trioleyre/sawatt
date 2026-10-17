@@ -35,6 +35,10 @@ android {
         // Lists English and French in the system's per-app language settings (Android 13+).
         generateLocaleConfig = true
     }
+    bundle {
+        // The language can be changed in the app, so every translation must ship with it.
+        language { enableSplit = false }
+    }
 }
 
 androidComponents {
