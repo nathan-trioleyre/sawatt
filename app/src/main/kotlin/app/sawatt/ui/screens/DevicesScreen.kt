@@ -110,7 +110,7 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
             GroupHeader("Connected", Modifier.padding(top = 0.dp))
             Group {
-                LinkRow(SawattIcons.DirectionsBike, SawattColors.Accent, "Bike", bike, bike?.let {
+                LinkRow(SawattIcons.DirectionsBike, SawattColors.Text, "Bike", bike, bike?.let {
                     "${readings.powerW} W · ${readings.cadenceRpm} rpm" + (it.firmware?.let { f -> " · fw $f" } ?: "")
                 }) {
                     trainer.disconnect(DeviceType.BIKE)
