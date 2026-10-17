@@ -47,11 +47,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sawatt.AppContainer
+import app.sawatt.R
 import app.sawatt.core.model.UnitSystem
 import app.sawatt.core.ride.RideMath
 import app.sawatt.core.trainer.LinkState
@@ -59,6 +61,7 @@ import app.sawatt.core.workout.CurrentInterval
 import app.sawatt.core.workout.IntervalKind
 import app.sawatt.core.workout.LiveState
 import app.sawatt.core.workout.WorkoutPlan
+import app.sawatt.ui.intervalName
 import app.sawatt.ui.components.IconTile
 import app.sawatt.ui.components.IntervalTable
 import app.sawatt.ui.components.Metric
@@ -107,26 +110,27 @@ fun WorkoutScreen(
     val bikeOk = bike?.state == LinkState.CONNECTED
     val hrOk = hr?.state == LinkState.CONNECTED
     val subtitle = when {
-        live == null -> plan?.let(::planMeta) ?: "Press Lap to split"
-        live.current.kind == IntervalKind.PLANNED ->
-            "Interval ${live.current.index} of ${live.plannedCount} · ${formatDuration(live.elapsedSec)}"
-        else -> "Interval ${live.current.index} · ${formatDuration(live.elapsedSec)}"
+        live == null -> if (plan != null) planMeta(plan) else stringResource(R.string.workout_press_lap_to_split)
+        live.current.kind == IntervalKind.PLANNED -> stringResource(
+            R.string.workout_interval_of_elapsed, live.current.index, live.plannedCount, formatDuration(live.elapsedSec),
+        )
+        else -> stringResource(R.string.workout_interval_elapsed, live.current.index, formatDuration(live.elapsedSec))
     }
     Scaffold(
         containerColor = SawattColors.Background,
         topBar = {
-            SawattTopBar(plan?.name ?: "Free ride", onBack, subtitle) {
+            SawattTopBar(plan?.name ?: stringResource(R.string.workout_free_ride), onBack, subtitle) {
                 IconButton(onClick = onDevices) {
                     Icon(
                         SawattIcons.DirectionsBike,
-                        if (bikeOk) "Bike connected" else "Bike not connected",
+                        stringResource(if (bikeOk) R.string.workout_bike_connected else R.string.workout_bike_not_connected),
                         tint = if (bikeOk) SawattColors.Accent else SawattColors.TextSecondary,
                     )
                 }
                 IconButton(onClick = onDevices) {
                     Icon(
                         Icons.Default.Favorite,
-                        if (hrOk) "Heart-rate strap connected" else "Heart-rate strap not connected",
+                        stringResource(if (hrOk) R.string.workout_hr_connected else R.string.workout_hr_not_connected),
                         tint = if (hrOk) SawattColors.Heart else SawattColors.TextSecondary,
                     )
                 }
@@ -160,16 +164,16 @@ fun WorkoutScreen(
     if (confirmDiscard) {
         AlertDialog(
             onDismissRequest = { confirmDiscard = false },
-            title = { Text("Discard workout?") },
-            text = { Text("Nothing will be saved.") },
+            title = { Text(stringResource(R.string.workout_discard_title)) },
+            text = { Text(stringResource(R.string.workout_discard_text)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmDiscard = false
                     controller.discard()
                     onFinished(false)
-                }) { Text("Discard") }
+                }) { Text(stringResource(R.string.workout_discard)) }
             },
-            dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { confirmDiscard = false }) { Text(stringResource(R.string.workout_cancel)) } },
         )
     }
 }
@@ -182,9 +186,9 @@ private fun Idle(plan: WorkoutPlan?, ftpW: Double, readings: SensorReadings, bik
                 IconTile(SawattIcons.Bluetooth, SawattColors.Below)
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text("No bike connected", style = MaterialTheme.typography.titleSmall)
+                    Text(stringResource(R.string.workout_no_bike), style = MaterialTheme.typography.titleSmall)
                     Text(
-                        "You can start anyway; data appears as soon as the bike is connected.",
+                        stringResource(R.string.workout_no_bike_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = SawattColors.TextSecondary,
                     )
@@ -194,15 +198,15 @@ private fun Idle(plan: WorkoutPlan?, ftpW: Double, readings: SensorReadings, bik
     }
     MetricGrid(
         listOf(
-            { StatTile("Power", readings.powerW.toString(), unit = "W", labelColor = SawattColors.Power, valueSize = 40.sp) },
-            { StatTile("Cadence", readings.cadenceRpm.toString(), unit = "rpm", labelColor = SawattColors.Cadence, valueSize = 40.sp) },
+            { StatTile(stringResource(R.string.workout_power), readings.powerW.toString(), unit = "W", labelColor = SawattColors.Power, valueSize = 40.sp) },
+            { StatTile(stringResource(R.string.workout_cadence), readings.cadenceRpm.toString(), unit = stringResource(R.string.workout_unit_rpm), labelColor = SawattColors.Cadence, valueSize = 40.sp) },
             {
                 StatTile(
-                    "Heart rate", if (readings.heartRate > 0) readings.heartRate.toString() else "–", unit = "bpm",
+                    stringResource(R.string.workout_heart_rate), if (readings.heartRate > 0) readings.heartRate.toString() else "–", unit = "bpm",
                     labelColor = SawattColors.Heart, valueSize = 40.sp,
                 )
             },
-            { StatTile("FTP", ftpW.roundToInt().toString(), unit = "W", valueSize = 40.sp) },
+            { StatTile(stringResource(R.string.workout_ftp), ftpW.roundToInt().toString(), unit = "W", valueSize = 40.sp) },
         ),
     )
     if (plan != null) {
@@ -215,9 +219,10 @@ private fun Idle(plan: WorkoutPlan?, ftpW: Double, readings: SensorReadings, bik
                     Box(Modifier.size(8.dp).clip(CircleShape).background(zoneColor(pct)))
                     Spacer(Modifier.width(10.dp))
                     Text(p.label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
-                    val cadence = p.block.targetCadenceRpm?.let { " · $it rpm" } ?: ""
+                    val rpm = stringResource(R.string.workout_unit_rpm)
+                    val cadence = p.block.targetCadenceRpm?.let { " · $it $rpm" } ?: ""
                     Text(
-                        "${formatDuration(p.block.durationSec)} @ ${p.block.targetLabel(ftpW)}$cadence",
+                        stringResource(R.string.workout_block_line, formatDuration(p.block.durationSec), p.block.targetLabel(ftpW)) + cadence,
                         style = MaterialTheme.typography.bodySmall,
                         color = SawattColors.TextSecondary,
                     )
@@ -226,7 +231,7 @@ private fun Idle(plan: WorkoutPlan?, ftpW: Double, readings: SensorReadings, bik
         }
     } else {
         Text(
-            "Free ride: press Lap at any time to start a new interval with its own averages.",
+            stringResource(R.string.workout_free_ride_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = SawattColors.TextSecondary,
         )
@@ -248,7 +253,7 @@ private fun Live(live: LiveState, plan: WorkoutPlan?, readings: SensorReadings, 
             modifier = Modifier.alignByBaseline(),
         )
         Text(
-            if (remaining != null) "  left" else "  elapsed",
+            "  " + stringResource(if (remaining != null) R.string.workout_left else R.string.workout_elapsed),
             style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.SemiBold,
             color = SawattColors.TextSecondary,
@@ -260,23 +265,23 @@ private fun Live(live: LiveState, plan: WorkoutPlan?, readings: SensorReadings, 
         listOf(
             {
                 StatTile(
-                    "Power", readings.powerW.toString(), unit = "W", labelColor = SawattColors.Power, valueSize = 36.sp,
+                    stringResource(R.string.workout_power), readings.powerW.toString(), unit = "W", labelColor = SawattColors.Power, valueSize = 36.sp,
                     valueColor = targetColor(readings.powerW.toDouble(), c.targetPowerW) ?: SawattColors.Text,
                 )
             },
             {
                 StatTile(
-                    "Cadence", readings.cadenceRpm.toString(), unit = "rpm", labelColor = SawattColors.Cadence, valueSize = 36.sp,
+                    stringResource(R.string.workout_cadence), readings.cadenceRpm.toString(), unit = stringResource(R.string.workout_unit_rpm), labelColor = SawattColors.Cadence, valueSize = 36.sp,
                     valueColor = cadenceColor(readings.cadenceRpm, c.targetCadenceRpm) ?: SawattColors.Text,
                 )
             },
             {
                 StatTile(
-                    "Heart rate", if (readings.heartRate > 0) readings.heartRate.toString() else "–", unit = "bpm",
+                    stringResource(R.string.workout_heart_rate), if (readings.heartRate > 0) readings.heartRate.toString() else "–", unit = "bpm",
                     labelColor = SawattColors.Heart, valueSize = 36.sp,
                 )
             },
-            { StatTile("Max · interval", c.stats.maxPowerW.toString(), unit = "W", valueSize = 36.sp) },
+            { StatTile(stringResource(R.string.workout_max_interval), c.stats.maxPowerW.toString(), unit = "W", valueSize = 36.sp) },
         ),
     )
 
@@ -291,28 +296,28 @@ private fun Live(live: LiveState, plan: WorkoutPlan?, readings: SensorReadings, 
     }
     live.next?.let { n ->
         Text(
-            "Next  ${n.label} · ${formatDuration(n.block.durationSec)} @ ${n.block.targetLabel(live.ftpW)}",
+            stringResource(R.string.workout_next, n.label, formatDuration(n.block.durationSec), n.block.targetLabel(live.ftpW)),
             style = MaterialTheme.typography.bodyMedium,
             color = SawattColors.TextSecondary,
         )
     }
     if (live.planFinished && live.plannedCount > 0) {
-        Text("Plan completed — keep riding or press Finish.", style = MaterialTheme.typography.bodyMedium, color = SawattColors.OnTarget)
+        Text(stringResource(R.string.workout_plan_completed), style = MaterialTheme.typography.bodyMedium, color = SawattColors.OnTarget)
     }
 
     SectionCard(Modifier.fillMaxWidth()) {
-        MetricLabel("Whole workout")
+        MetricLabel(stringResource(R.string.workout_whole_workout))
         val s = live.session
         Row {
-            StatTile("Avg power", s.avgPowerW.roundToInt().toString(), Modifier.weight(1f), unit = "W", valueSize = 22.sp)
-            StatTile("Distance", formatDistance(s.distanceKm, units), Modifier.weight(1f), valueSize = 22.sp)
-            StatTile("Energy", s.kcal.roundToInt().toString(), Modifier.weight(1f), unit = "kcal", valueSize = 22.sp)
+            StatTile(stringResource(R.string.workout_avg_power), s.avgPowerW.roundToInt().toString(), Modifier.weight(1f), unit = "W", valueSize = 22.sp)
+            StatTile(stringResource(R.string.workout_distance), formatDistance(s.distanceKm, units), Modifier.weight(1f), valueSize = 22.sp)
+            StatTile(stringResource(R.string.workout_energy), s.kcal.roundToInt().toString(), Modifier.weight(1f), unit = "kcal", valueSize = 22.sp)
         }
     }
 
     if (live.completed.isNotEmpty()) {
         SectionCard(Modifier.fillMaxWidth()) {
-            MetricLabel("Completed intervals")
+            MetricLabel(stringResource(R.string.workout_completed_intervals))
             IntervalTable(live.completed.reversed(), live.ftpW)
         }
     }
@@ -325,17 +330,22 @@ private fun IntervalHeader(c: CurrentInterval, live: LiveState) {
             val target = c.targetPowerW
             val zone = c.targetFtpPercent?.toDouble() ?: if (target != null && live.ftpW > 0) target * 100 / live.ftpW else null
             MetricLabel(
-                if (c.kind == IntervalKind.PLANNED) "Interval ${c.index} of ${live.plannedCount}" else "Lap ${c.index}",
+                if (c.kind == IntervalKind.PLANNED) {
+                    stringResource(R.string.workout_interval_of, c.index, live.plannedCount)
+                } else {
+                    stringResource(R.string.workout_lap_n, c.index)
+                },
                 zone?.let(::zoneColor) ?: SawattColors.Accent,
             )
-            Text(c.name, style = MaterialTheme.typography.titleLarge, fontSize = 26.sp)
+            Text(intervalName(c.name, c.kind), style = MaterialTheme.typography.titleLarge, fontSize = 26.sp)
         }
         if (c.targetPowerW != null) {
             SectionCard(padding = 10.dp, spacing = 0.dp) {
-                MetricLabel("Target")
+                MetricLabel(stringResource(R.string.workout_target))
                 Metric(
                     c.targetPowerW.toString(),
-                    unit = "W" + (c.targetFtpPercent?.let { " · $it%" } ?: "") + (c.targetCadenceRpm?.let { " · $it rpm" } ?: ""),
+                    unit = "W" + (c.targetFtpPercent?.let { " · $it%" } ?: "") +
+                        (c.targetCadenceRpm?.let { " · $it ${stringResource(R.string.workout_unit_rpm)}" } ?: ""),
                     size = 24.sp,
                 )
             }
@@ -351,9 +361,9 @@ private fun IntervalRing(c: CurrentInterval, status: WorkoutStatus) {
     val progress = c.plannedDurationSec?.let { (c.elapsedSec.toFloat() / it).coerceIn(0f, 1f) }
     val verdict = when {
         c.targetPowerW == null -> "W"
-        color == SawattColors.Below -> "W · below target"
-        color == SawattColors.Above -> "W · above target"
-        else -> "W · on target"
+        color == SawattColors.Below -> stringResource(R.string.workout_below_target)
+        color == SawattColors.Above -> stringResource(R.string.workout_above_target)
+        else -> stringResource(R.string.workout_on_target)
     }
     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Box(Modifier.size(236.dp), contentAlignment = Alignment.Center) {
@@ -371,7 +381,7 @@ private fun IntervalRing(c: CurrentInterval, status: WorkoutStatus) {
                 }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                MetricLabel("Interval avg")
+                MetricLabel(stringResource(R.string.workout_interval_avg))
                 Text(
                     avg.roundToInt().toString(),
                     fontFamily = SawattFonts.Numbers,
@@ -381,7 +391,7 @@ private fun IntervalRing(c: CurrentInterval, status: WorkoutStatus) {
                     color = color,
                 )
                 if (status == WorkoutStatus.PAUSED) {
-                    Text("PAUSED", style = MaterialTheme.typography.labelMedium, color = SawattColors.Pause)
+                    Text(stringResource(R.string.workout_paused), style = MaterialTheme.typography.labelMedium, color = SawattColors.Pause)
                 } else {
                     Text(verdict, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold, color = SawattColors.TextSecondary)
                 }
@@ -421,15 +431,15 @@ private fun Controls(
         horizontalArrangement = Arrangement.spacedBy(40.dp, Alignment.CenterHorizontally),
     ) {
         when (status) {
-            WorkoutStatus.IDLE -> RoundButton(Icons.Default.PlayArrow, "Start", onStart, size = 80.dp)
+            WorkoutStatus.IDLE -> RoundButton(Icons.Default.PlayArrow, stringResource(R.string.workout_start), onStart, size = 80.dp)
             WorkoutStatus.RUNNING -> {
-                RoundButton(SawattIcons.Pause, "Pause", onPause, container = SawattColors.Pause.copy(alpha = 0.18f), content = SawattColors.Pause)
-                RoundButton(SawattIcons.Flag, "Lap", onLap)
+                RoundButton(SawattIcons.Pause, stringResource(R.string.workout_pause), onPause, container = SawattColors.Pause.copy(alpha = 0.18f), content = SawattColors.Pause)
+                RoundButton(SawattIcons.Flag, stringResource(R.string.workout_lap), onLap)
             }
             WorkoutStatus.PAUSED -> {
-                RoundButton(Icons.Default.Delete, "Discard", onDiscard, container = SawattColors.Above.copy(alpha = 0.16f), content = SawattColors.Above)
-                RoundButton(SawattIcons.Stop, "Finish", onFinish, container = SawattColors.SurfaceHigh, content = SawattColors.Text)
-                RoundButton(Icons.Default.PlayArrow, "Resume", onResume)
+                RoundButton(Icons.Default.Delete, stringResource(R.string.workout_discard), onDiscard, container = SawattColors.Above.copy(alpha = 0.16f), content = SawattColors.Above)
+                RoundButton(SawattIcons.Stop, stringResource(R.string.workout_finish), onFinish, container = SawattColors.SurfaceHigh, content = SawattColors.Text)
+                RoundButton(Icons.Default.PlayArrow, stringResource(R.string.workout_resume), onResume)
             }
         }
     }

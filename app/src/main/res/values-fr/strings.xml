@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="notification_channel_workout">Séance en cours</string>
+    <string name="interval_lap">Tour %1$d</string>
+    <string name="interval_free_ride">Sortie libre %1$d</string>
+</resources>

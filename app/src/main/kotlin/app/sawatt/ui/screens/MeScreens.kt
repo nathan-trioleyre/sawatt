@@ -1,5 +1,6 @@
 package app.sawatt.ui.screens
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,12 +28,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import app.sawatt.AppContainer
+import app.sawatt.R
 import app.sawatt.core.model.Gender
 import app.sawatt.core.model.UnitSystem
 import app.sawatt.core.ride.RideMath
@@ -67,55 +70,61 @@ fun MeScreen(container: AppContainer, nav: NavHostController) {
     val ftpW = RideMath.effectiveFtp(profile)
 
     Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-        LargeTitle("Me")
+        LargeTitle(stringResource(R.string.nav_me))
 
         SectionCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp).fillMaxWidth(), onClick = { nav.navigate(Routes.PROFILE) }) {
             Row {
-                ProfileNumber("FTP", ftpW.roundToInt().toString(), "W", Modifier.weight(1f)) {
-                    if (profile.weightKg > 0) "%.1f W/kg".format(ftpW / profile.weightKg) else ""
-                }
-                ProfileNumber("Max HR", RideMath.effectiveMaxHr(profile).roundToInt().toString(), "bpm", Modifier.weight(1f)) {
-                    if (profile.maxHr > 0) "Set by you" else "Estimated"
-                }
-                ProfileNumber("Weight", profile.weightKg.roundToInt().toString(), "kg", Modifier.weight(1f)) {
-                    "Edit profile"
-                }
+                ProfileNumber(
+                    stringResource(R.string.me_ftp), ftpW.roundToInt().toString(), "W",
+                    if (profile.weightKg > 0) "%.1f W/kg".format(ftpW / profile.weightKg) else "",
+                    Modifier.weight(1f),
+                )
+                ProfileNumber(
+                    stringResource(R.string.me_max_hr), RideMath.effectiveMaxHr(profile).roundToInt().toString(), "bpm",
+                    stringResource(if (profile.maxHr > 0) R.string.me_set_by_you else R.string.me_estimated),
+                    Modifier.weight(1f),
+                )
+                ProfileNumber(
+                    stringResource(R.string.me_weight), profile.weightKg.roundToInt().toString(), "kg",
+                    stringResource(R.string.me_edit_profile),
+                    Modifier.weight(1f),
+                )
             }
         }
 
-        GroupHeader("Devices")
+        GroupHeader(stringResource(R.string.me_devices))
         Group {
             GroupRow(
-                "Bike",
-                value = linkStatus(bike),
+                stringResource(R.string.me_bike),
+                value = stringResource(linkStatus(bike)),
                 leading = { IconTile(SawattIcons.DirectionsBike, SawattColors.Text) },
                 onClick = { nav.navigate(Routes.DEVICES) },
             )
             GroupDivider()
             GroupRow(
-                "Heart-rate strap",
-                value = linkStatus(hr),
+                stringResource(R.string.me_hr_strap),
+                value = stringResource(linkStatus(hr)),
                 leading = { IconTile(Icons.Default.Favorite, SawattColors.Heart) },
                 onClick = { nav.navigate(Routes.DEVICES) },
             )
         }
 
-        GroupHeader("During a workout")
+        GroupHeader(stringResource(R.string.me_during_workout))
         Group {
-            SwitchRow("Beep at each transition", app.transitionBeep) { v -> update { it.copy(transitionBeep = v) } }
+            SwitchRow(stringResource(R.string.me_transition_beep), app.transitionBeep) { v -> update { it.copy(transitionBeep = v) } }
             GroupDivider()
-            SwitchRow("3-2-1 countdown", app.countdownBeeps, "Three short beeps before each block ends") { v ->
+            SwitchRow(stringResource(R.string.me_countdown), app.countdownBeeps, stringResource(R.string.me_countdown_hint)) { v ->
                 update { it.copy(countdownBeeps = v) }
             }
             GroupDivider()
-            SwitchRow("Keep screen on", app.keepScreenOn) { v -> update { it.copy(keepScreenOn = v) } }
+            SwitchRow(stringResource(R.string.me_keep_screen_on), app.keepScreenOn) { v -> update { it.copy(keepScreenOn = v) } }
         }
 
-        GroupHeader("App")
+        GroupHeader(stringResource(R.string.me_app))
         Group {
             GroupRow(
-                "Units",
-                value = if (profile.units == UnitSystem.METRIC) "Metric" else "Imperial",
+                stringResource(R.string.me_units),
+                value = stringResource(if (profile.units == UnitSystem.METRIC) R.string.me_units_metric else R.string.me_units_imperial),
                 onClick = {
                     container.settings.updateProfile {
                         it.copy(units = if (it.units == UnitSystem.METRIC) UnitSystem.IMPERIAL else UnitSystem.METRIC)
@@ -123,19 +132,18 @@ fun MeScreen(container: AppContainer, nav: NavHostController) {
                 },
             )
             GroupDivider()
-            SwitchRow("Simulated bike", app.simulateBike, "Try SaWatt without a bike") { v -> update { it.copy(simulateBike = v) } }
+            SwitchRow(stringResource(R.string.me_simulated_bike), app.simulateBike, stringResource(R.string.me_simulated_bike_hint)) { v -> update { it.copy(simulateBike = v) } }
             GroupDivider()
-            GroupRow("About SaWatt", onClick = { aboutOpen = !aboutOpen })
+            GroupRow(stringResource(R.string.me_about), onClick = { aboutOpen = !aboutOpen })
             if (aboutOpen) {
                 Column(Modifier.padding(start = 14.dp, end = 14.dp, bottom = 14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
-                        "Structured interval training for indoor bikes and power meters. SaWatt reads the bike over " +
-                            "the standard Bluetooth Cycling Power service and never writes to it.",
+                        stringResource(R.string.me_about_text),
                         style = MaterialTheme.typography.bodySmall,
                         color = SawattColors.TextSecondary,
                     )
                     Text(
-                        "Bike firmware: ${bike?.firmware ?: "unknown (connect the bike)"}",
+                        stringResource(R.string.me_bike_firmware, bike?.firmware ?: stringResource(R.string.me_bike_firmware_unknown)),
                         style = MaterialTheme.typography.bodySmall,
                         color = SawattColors.TextSecondary,
                     )
@@ -150,21 +158,22 @@ private fun ProfileNumber(
     label: String,
     value: String,
     unit: String,
+    caption: String,
     modifier: Modifier,
-    caption: () -> String,
 ) {
     Column(modifier) {
         MetricLabel(label)
         Metric(value, unit = unit, size = 30.sp)
-        Text(caption(), style = MaterialTheme.typography.bodySmall, fontSize = 12.sp, color = SawattColors.TextSecondary)
+        Text(caption, style = MaterialTheme.typography.bodySmall, fontSize = 12.sp, color = SawattColors.TextSecondary)
     }
 }
 
-private fun linkStatus(link: DeviceLink?): String = when (link?.state) {
-    null -> "Not connected"
-    LinkState.CONNECTING -> "Connecting…"
-    LinkState.CONNECTED -> "Connected"
-    LinkState.RECONNECTING -> "Waiting…"
+@StringRes
+private fun linkStatus(link: DeviceLink?): Int = when (link?.state) {
+    null -> R.string.me_link_not_connected
+    LinkState.CONNECTING -> R.string.me_link_connecting
+    LinkState.CONNECTED -> R.string.me_link_connected
+    LinkState.RECONNECTING -> R.string.me_link_waiting
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -173,35 +182,35 @@ fun ProfileScreen(container: AppContainer, onBack: () -> Unit) {
     val profile by container.settings.profile.collectAsStateWithLifecycle()
     val update = container.settings::updateProfile
 
-    Scaffold(containerColor = SawattColors.Background, topBar = { SawattTopBar("Profile", onBack) }) { padding ->
+    Scaffold(containerColor = SawattColors.Background, topBar = { SawattTopBar(stringResource(R.string.me_profile), onBack) }) { padding ->
         Column(
             Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-            MetricLabel("Training")
+            MetricLabel(stringResource(R.string.me_training))
             NumberSetting(
-                "FTP (W) — 0 = estimate",
+                stringResource(R.string.me_ftp_setting),
                 profile.ftpW,
-                supporting = "Estimated: ${RideMath.estimatedFtp(profile).roundToInt()} W",
+                supporting = stringResource(R.string.me_estimated_watts, RideMath.estimatedFtp(profile).roundToInt()),
             ) { v -> if (v in 0..999) update { it.copy(ftpW = v) } }
             NumberSetting(
-                "Max heart rate (bpm) — 0 = estimate",
+                stringResource(R.string.me_max_hr_setting),
                 profile.maxHr,
-                supporting = "Estimated: ${RideMath.estimatedMaxHr(RideMath.age(profile.birthDate)).roundToInt()} bpm",
+                supporting = stringResource(R.string.me_estimated_bpm, RideMath.estimatedMaxHr(RideMath.age(profile.birthDate)).roundToInt()),
             ) { v -> if (v in 0..250) update { it.copy(maxHr = v) } }
-            Choice("Cardio training per week", listOf("1-3 h", "3-5 h", "5-8 h", "8+ h"), profile.trainingLevel) { i ->
+            Choice(stringResource(R.string.me_training_per_week), listOf("1-3 h", "3-5 h", "5-8 h", "8+ h"), profile.trainingLevel) { i ->
                 update { it.copy(trainingLevel = i) }
             }
 
-            MetricLabel("You", modifier = Modifier.padding(top = 8.dp))
-            Choice("Gender", listOf("Male", "Female"), if (profile.gender == Gender.MALE) 0 else 1) { i ->
+            MetricLabel(stringResource(R.string.me_you), modifier = Modifier.padding(top = 8.dp))
+            Choice(stringResource(R.string.me_gender), listOf(stringResource(R.string.me_male), stringResource(R.string.me_female)), if (profile.gender == Gender.MALE) 0 else 1) { i ->
                 update { it.copy(gender = if (i == 0) Gender.MALE else Gender.FEMALE) }
             }
-            TextSetting("Date of birth (YYYY-MM-DD)", profile.birthDate.toString(), KeyboardType.Text) { text ->
+            TextSetting(stringResource(R.string.me_birth_date), profile.birthDate.toString(), KeyboardType.Text) { text ->
                 runCatching { LocalDate.parse(text) }.getOrNull()?.let { d -> update { it.copy(birthDate = d) } }
             }
-            NumberSetting("Weight (kg)", profile.weightKg.roundToInt()) { v -> if (v in 30..300) update { it.copy(weightKg = v.toDouble()) } }
-            NumberSetting("Height (cm)", profile.heightCm.roundToInt()) { v -> if (v in 120..250) update { it.copy(heightCm = v.toDouble()) } }
+            NumberSetting(stringResource(R.string.me_weight_setting), profile.weightKg.roundToInt()) { v -> if (v in 30..300) update { it.copy(weightKg = v.toDouble()) } }
+            NumberSetting(stringResource(R.string.me_height_setting), profile.heightCm.roundToInt()) { v -> if (v in 120..250) update { it.copy(heightCm = v.toDouble()) } }
         }
     }
 }

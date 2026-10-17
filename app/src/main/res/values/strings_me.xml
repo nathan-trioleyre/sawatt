@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Tabs -->
+    <string name="nav_today">Today</string>
+    <string name="nav_workouts">Workouts</string>
+    <string name="nav_history">History</string>
+    <string name="nav_me">Me</string>
+
+    <!-- Me tab -->
+    <string name="me_ftp">FTP</string>
+    <string name="me_max_hr">Max HR</string>
+    <string name="me_weight">Weight</string>
+    <string name="me_set_by_you">Set by you</string>
+    <string name="me_estimated">Estimated</string>
+    <string name="me_edit_profile">Edit profile</string>
+    <string name="me_devices">Devices</string>
+    <string name="me_bike">Bike</string>
+    <string name="me_hr_strap">Heart-rate strap</string>
+    <string name="me_link_not_connected">Not connected</string>
+    <string name="me_link_connecting">Connecting…</string>
+    <string name="me_link_connected">Connected</string>
+    <string name="me_link_waiting">Waiting…</string>
+    <string name="me_during_workout">During a workout</string>
+    <string name="me_transition_beep">Beep at each transition</string>
+    <string name="me_countdown" tools:ignore="TypographyDashes">3-2-1 countdown</string>
+    <string name="me_countdown_hint">Three short beeps before each block ends</string>
+    <string name="me_keep_screen_on">Keep screen on</string>
+    <string name="me_app">App</string>
+    <string name="me_units">Units</string>
+    <string name="me_units_metric">Metric</string>
+    <string name="me_units_imperial">Imperial</string>
+    <string name="me_simulated_bike">Simulated bike</string>
+    <string name="me_simulated_bike_hint">Try SaWatt without a bike</string>
+    <string name="me_about">About SaWatt</string>
+    <string name="me_about_text">Structured interval training for indoor bikes and power meters. SaWatt reads the bike over the standard Bluetooth Cycling Power service and never writes to it.</string>
+    <string name="me_bike_firmware">Bike firmware: %1$s</string>
+    <string name="me_bike_firmware_unknown">unknown (connect the bike)</string>
+
+    <!-- Profile -->
+    <string name="me_profile">Profile</string>
+    <string name="me_training">Training</string>
+    <string name="me_ftp_setting">FTP (W) — 0 = estimate</string>
+    <string name="me_estimated_watts">Estimated: %1$d W</string>
+    <string name="me_max_hr_setting">Max heart rate (bpm) — 0 = estimate</string>
+    <string name="me_estimated_bpm">Estimated: %1$d bpm</string>
+    <string name="me_training_per_week">Cardio training per week</string>
+    <string name="me_you">You</string>
+    <string name="me_gender">Gender</string>
+    <string name="me_male">Male</string>
+    <string name="me_female">Female</string>
+    <string name="me_birth_date">Date of birth (YYYY-MM-DD)</string>
+    <string name="me_weight_setting">Weight (kg)</string>
+    <string name="me_height_setting">Height (cm)</string>
+
+    <!-- Devices -->
+    <string name="devices_title">Devices</string>
+    <string name="devices_connected">Connected</string>
+    <string name="devices_bike">Bike</string>
+    <string name="devices_hr_strap">Heart-rate strap</string>
+    <string name="devices_link_not_connected">Not connected</string>
+    <string name="devices_link_connecting">Connecting…</string>
+    <string name="devices_link_connected">Connected</string>
+    <string name="devices_link_waiting">Waiting for the device…</string>
+    <string name="devices_forget">Forget</string>
+    <string name="devices_scan">Scan</string>
+    <string name="devices_scanning">Scanning…</string>
+    <string name="devices_stop">Stop</string>
+    <string name="devices_bluetooth_off">Bluetooth must be on to connect.</string>
+    <string name="devices_permission_required">Bluetooth permission is required to find the bike.</string>
+    <string name="devices_cant_find_bike">Can\'t find your bike? Start pedalling: many indoor bikes are powered by your pedalling and only advertise while awake.</string>
+    <string name="devices_nearby">Nearby</string>
+</resources>

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plan_title">Workouts</string>
+    <string name="plan_new">New workout</string>
+    <string name="plan_edit">Edit workout</string>
+    <string name="plan_default_name">Workout</string>
+    <string name="plan_empty">No workout yet. Tap + to build one from blocks of time and power.</string>
+    <string name="plan_ride">Ride %1$s</string>
+    <plurals name="plan_meta">
+        <item quantity="one">%1$s · %2$d interval</item>
+        <item quantity="other">%1$s · %2$d intervals</item>
+    </plurals>
+    <string name="plan_incomplete">Incomplete workout</string>
+    <string name="plan_invalid">Check the highlighted values: duration like 15 or 15:00, power in W, optional cadence.</string>
+    <string name="plan_save">Save</string>
+    <string name="plan_delete">Delete workout</string>
+    <string name="plan_delete_confirm">Delete \"%1$s\"?</string>
+    <string name="plan_delete_action">Delete</string>
+    <string name="plan_cancel">Cancel</string>
+    <string name="plan_name">Workout name</string>
+    <string name="plan_block">Block</string>
+    <string name="plan_repeat">Repeat</string>
+    <string name="plan_repeat_set">Repeat set</string>
+    <string name="plan_block_in_set">Block in set</string>
+    <string name="plan_duration_help">Durations: \"15\" = 15 min, \"15:30\" = 15 min 30 s. Cadence is optional.</string>
+    <string name="plan_move_up">Move up</string>
+    <string name="plan_move_down">Move down</string>
+    <string name="plan_remove">Remove</string>
+    <string name="plan_remove_block">Remove block</string>
+    <string name="plan_block_name">Name</string>
+    <string name="plan_duration">Duration</string>
+    <string name="plan_power_percent">% FTP</string>
+    <string name="plan_power_watts">Power W</string>
+    <string name="plan_cadence">rpm</string>
+    <string name="plan_optional">opt.</string>
+    <string name="plan_percent_of_ftp">% of FTP</string>
+    <string name="plan_percent_hint">≈ %1$d W with your FTP of %2$d W</string>
+    <string name="plan_block_warm_up">Warm-up</string>
+    <string name="plan_block_interval">Interval</string>
+    <string name="plan_block_effort">Effort</string>
+    <string name="plan_block_recovery">Recovery</string>
+</resources>

@@ -16,17 +16,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.sawatt.R
 import app.sawatt.core.workout.WorkoutPlan
 import app.sawatt.ui.formatDuration
 import app.sawatt.ui.theme.SawattColors
 
+@Composable
 fun planMeta(plan: WorkoutPlan): String {
     val n = plan.flatten().size
-    return "${formatDuration(plan.totalDurationSec)} · $n interval" + if (n > 1) "s" else ""
+    return pluralStringResource(R.plurals.plan_meta, n, formatDuration(plan.totalDurationSec), n)
 }
 
 /** A plan with its name, duration and intensity profile. */

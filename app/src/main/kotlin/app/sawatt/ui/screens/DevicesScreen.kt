@@ -36,10 +36,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.sawatt.AppContainer
+import app.sawatt.R
 import app.sawatt.core.trainer.DeviceLink
 import app.sawatt.core.trainer.DeviceType
 import app.sawatt.core.trainer.DiscoveredDevice
@@ -71,14 +73,14 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
     val bike by trainer.bike.collectAsStateWithLifecycle()
     val hr by trainer.heartRateSensor.collectAsStateWithLifecycle()
     val readings by container.workout.readings.collectAsStateWithLifecycle()
-    var message by remember { mutableStateOf<String?>(null) }
+    var message by remember { mutableStateOf<Int?>(null) }
 
     fun hasPermissions() = blePermissions.all {
         ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
     }
 
     val enableBt = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (trainer.isEnabled()) trainer.startScan() else message = "Bluetooth must be on to connect."
+        if (trainer.isEnabled()) trainer.startScan() else message = R.string.devices_bluetooth_off
     }
 
     fun scan() {
@@ -95,7 +97,7 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
             // Also ask for notifications (workout notification); not required.
             scan()
         } else {
-            message = "Bluetooth permission is required to find the bike."
+            message = R.string.devices_permission_required
         }
     }
 
@@ -106,18 +108,18 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
 
     LaunchedEffect(Unit) { requestScan() }
 
-    Scaffold(containerColor = SawattColors.Background, topBar = { SawattTopBar("Devices", onBack) }) { padding ->
+    Scaffold(containerColor = SawattColors.Background, topBar = { SawattTopBar(stringResource(R.string.devices_title), onBack) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-            GroupHeader("Connected", Modifier.padding(top = 0.dp))
+            GroupHeader(stringResource(R.string.devices_connected), Modifier.padding(top = 0.dp))
             Group {
-                LinkRow(SawattIcons.DirectionsBike, SawattColors.Text, "Bike", bike, bike?.let {
+                LinkRow(SawattIcons.DirectionsBike, SawattColors.Text, stringResource(R.string.devices_bike), bike, bike?.let {
                     "${readings.powerW} W · ${readings.cadenceRpm} rpm" + (it.firmware?.let { f -> " · fw $f" } ?: "")
                 }) {
                     trainer.disconnect(DeviceType.BIKE)
                     if (!simulated) container.settings.updateApp { it.copy(defaultBike = null) }
                 }
                 GroupDivider()
-                LinkRow(Icons.Default.Favorite, SawattColors.Heart, "Heart-rate strap", hr, hr?.let { "${readings.heartRate} bpm" }) {
+                LinkRow(Icons.Default.Favorite, SawattColors.Heart, stringResource(R.string.devices_hr_strap), hr, hr?.let { "${readings.heartRate} bpm" }) {
                     trainer.disconnect(DeviceType.HEART_RATE)
                     if (!simulated) container.settings.updateApp { it.copy(defaultHrSensor = null) }
                 }
@@ -128,17 +130,17 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Button(onClick = ::requestScan, enabled = !scanning) { Text(if (scanning) "Scanning…" else "Scan") }
+                Button(onClick = ::requestScan, enabled = !scanning) { Text(stringResource(if (scanning) R.string.devices_scanning else R.string.devices_scan)) }
                 if (scanning) {
-                    OutlinedButton(onClick = trainer::stopScan) { Text("Stop") }
+                    OutlinedButton(onClick = trainer::stopScan) { Text(stringResource(R.string.devices_stop)) }
                     CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = SawattColors.Accent)
                 }
             }
             message?.let {
-                Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+                Text(stringResource(it), color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
             }
             Text(
-                "Can't find your bike? Start pedalling: many indoor bikes are powered by your pedalling and only advertise while awake.",
+                stringResource(R.string.devices_cant_find_bike),
                 style = MaterialTheme.typography.bodySmall,
                 color = SawattColors.TextSecondary,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
@@ -147,7 +149,7 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
             val connected = setOfNotNull(bike?.device?.address, hr?.device?.address)
             val nearby = discovered.filter { it.address !in connected }
             if (nearby.isNotEmpty()) {
-                GroupHeader("Nearby")
+                GroupHeader(stringResource(R.string.devices_nearby))
                 Group {
                     nearby.forEachIndexed { i, d ->
                         if (i > 0) GroupDivider()
@@ -172,17 +174,19 @@ private fun notificationPermission(): Array<String> =
 
 @Composable
 private fun LinkRow(icon: ImageVector, color: Color, title: String, link: DeviceLink?, extra: String?, onForget: () -> Unit) {
-    val state = when (link?.state) {
-        null -> "Not connected"
-        LinkState.CONNECTING -> "Connecting…"
-        LinkState.CONNECTED -> "Connected"
-        LinkState.RECONNECTING -> "Waiting for the device…"
-    }
+    val state = stringResource(
+        when (link?.state) {
+            null -> R.string.devices_link_not_connected
+            LinkState.CONNECTING -> R.string.devices_link_connecting
+            LinkState.CONNECTED -> R.string.devices_link_connected
+            LinkState.RECONNECTING -> R.string.devices_link_waiting
+        },
+    )
     GroupRow(
         link?.device?.name ?: title,
         subtitle = listOfNotNull(state, extra).joinToString(" · "),
         leading = { IconTile(icon, color) },
-        trailing = if (link != null) ({ TextButton(onClick = onForget) { Text("Forget") } }) else null,
+        trailing = if (link != null) ({ TextButton(onClick = onForget) { Text(stringResource(R.string.devices_forget)) } }) else null,
     )
 }
 

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Tabs -->
+    <string name="nav_today">Aujourd\'hui</string>
+    <string name="nav_workouts">Séances</string>
+    <string name="nav_history">Historique</string>
+    <string name="nav_me">Moi</string>
+
+    <!-- Me tab -->
+    <string name="me_ftp">FTP</string>
+    <string name="me_max_hr">FC max</string>
+    <string name="me_weight">Poids</string>
+    <string name="me_set_by_you">Saisie par toi</string>
+    <string name="me_estimated">Estimée</string>
+    <string name="me_edit_profile">Modifier le profil</string>
+    <string name="me_devices">Appareils</string>
+    <string name="me_bike">Vélo</string>
+    <string name="me_hr_strap">Ceinture cardio</string>
+    <string name="me_link_not_connected">Non connecté</string>
+    <string name="me_link_connecting">Connexion…</string>
+    <string name="me_link_connected">Connecté</string>
+    <string name="me_link_waiting">En attente…</string>
+    <string name="me_during_workout">Pendant une séance</string>
+    <string name="me_transition_beep">Bip à chaque transition</string>
+    <string name="me_countdown" tools:ignore="TypographyDashes">Décompte 3-2-1</string>
+    <string name="me_countdown_hint">Trois bips courts avant la fin de chaque bloc</string>
+    <string name="me_keep_screen_on">Garder l\'écran allumé</string>
+    <string name="me_app">Application</string>
+    <string name="me_units">Unités</string>
+    <string name="me_units_metric">Métrique</string>
+    <string name="me_units_imperial">Impérial</string>
+    <string name="me_simulated_bike">Vélo simulé</string>
+    <string name="me_simulated_bike_hint">Essayer SaWatt sans vélo</string>
+    <string name="me_about">À propos de SaWatt</string>
+    <string name="me_about_text">Entraînement par intervalles structurés pour vélos d\'intérieur et capteurs de puissance. SaWatt lit le vélo via le service Bluetooth standard Cycling Power et n\'y écrit jamais.</string>
+    <string name="me_bike_firmware">Firmware du vélo : %1$s</string>
+    <string name="me_bike_firmware_unknown">inconnu (connecte le vélo)</string>
+
+    <!-- Profile -->
+    <string name="me_profile">Profil</string>
+    <string name="me_training">Entraînement</string>
+    <string name="me_ftp_setting">FTP (W) — 0 = estimation</string>
+    <string name="me_estimated_watts">Estimée : %1$d W</string>
+    <string name="me_max_hr_setting">Fréquence cardiaque max (bpm) — 0 = estimation</string>
+    <string name="me_estimated_bpm">Estimée : %1$d bpm</string>
+    <string name="me_training_per_week">Entraînement cardio par semaine</string>
+    <string name="me_you">Toi</string>
+    <string name="me_gender">Sexe</string>
+    <string name="me_male">Homme</string>
+    <string name="me_female">Femme</string>
+    <string name="me_birth_date">Date de naissance (AAAA-MM-JJ)</string>
+    <string name="me_weight_setting">Poids (kg)</string>
+    <string name="me_height_setting">Taille (cm)</string>
+
+    <!-- Devices -->
+    <string name="devices_title">Appareils</string>
+    <string name="devices_connected">Connectés</string>
+    <string name="devices_bike">Vélo</string>
+    <string name="devices_hr_strap">Ceinture cardio</string>
+    <string name="devices_link_not_connected">Non connecté</string>
+    <string name="devices_link_connecting">Connexion…</string>
+    <string name="devices_link_connected">Connecté</string>
+    <string name="devices_link_waiting">En attente de l\'appareil…</string>
+    <string name="devices_forget">Oublier</string>
+    <string name="devices_scan">Rechercher</string>
+    <string name="devices_scanning">Recherche…</string>
+    <string name="devices_stop">Arrêter</string>
+    <string name="devices_bluetooth_off">Le Bluetooth doit être activé pour se connecter.</string>
+    <string name="devices_permission_required">L\'autorisation Bluetooth est nécessaire pour trouver le vélo.</string>
+    <string name="devices_cant_find_bike">Tu ne trouves pas ton vélo ? Pédale : beaucoup de vélos d\'intérieur sont alimentés par le pédalage et ne sont visibles qu\'une fois réveillés.</string>
+    <string name="devices_nearby">À proximité</string>
+</resources>

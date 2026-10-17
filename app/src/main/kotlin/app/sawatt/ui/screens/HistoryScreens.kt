@@ -39,6 +39,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -47,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import app.sawatt.AppContainer
+import app.sawatt.R
 import app.sawatt.core.history.HistoryStats
 import app.sawatt.core.history.PeriodKind
 import app.sawatt.core.model.UnitSystem
@@ -96,16 +99,16 @@ fun SummaryScreen(container: AppContainer, onDone: () -> Unit) {
         topBar = {
             SawattTopBar("") {
                 r?.let { ExportButton(container.exporter, it) }
-                TextButton(onClick = onDone) { Text("Done", fontWeight = FontWeight.Bold) }
+                TextButton(onClick = onDone) { Text(stringResource(R.string.history_done), fontWeight = FontWeight.Bold) }
             }
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())) {
             if (r == null) {
-                Text("Nothing to show.", Modifier.padding(20.dp))
+                Text(stringResource(R.string.history_nothing_to_show), Modifier.padding(20.dp))
             } else {
                 Text(
-                    "Saved to history",
+                    stringResource(R.string.history_saved),
                     style = MaterialTheme.typography.bodySmall,
                     color = SawattColors.Accent,
                     modifier = Modifier.padding(horizontal = 20.dp),
@@ -114,7 +117,7 @@ fun SummaryScreen(container: AppContainer, onDone: () -> Unit) {
                 TextButton(
                     onClick = { confirmDelete = true },
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp).navigationBarsPadding(),
-                ) { Text("Delete this workout", color = SawattColors.Above) }
+                ) { Text(stringResource(R.string.history_delete_this_workout), color = SawattColors.Above) }
             }
         }
     }
@@ -123,7 +126,7 @@ fun SummaryScreen(container: AppContainer, onDone: () -> Unit) {
     }
 }
 
-private val kinds = listOf(PeriodKind.WEEK to "Week", PeriodKind.MONTH to "Month", PeriodKind.YEAR to "Year")
+private val kinds = listOf(PeriodKind.WEEK to R.string.history_week, PeriodKind.MONTH to R.string.history_month, PeriodKind.YEAR to R.string.history_year)
 
 @Composable
 fun HistoryScreen(container: AppContainer, nav: NavHostController) {
@@ -136,13 +139,13 @@ fun HistoryScreen(container: AppContainer, nav: NavHostController) {
     var periodIndex by rememberSaveable(kindIndex) { mutableIntStateOf(0) }
 
     Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-        LargeTitle("History")
-        Segmented(kinds.map { it.second }, kindIndex, Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp)) { kindIndex = it }
+        LargeTitle(stringResource(R.string.history_title))
+        Segmented(kinds.map { stringResource(it.second) }, kindIndex, Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp)) { kindIndex = it }
 
         val p = periods.getOrNull(periodIndex.coerceAtMost(periods.lastIndex))
         if (p == null) {
             Text(
-                "No workout yet. Your rides will show up here, week by week.",
+                stringResource(R.string.history_empty),
                 style = MaterialTheme.typography.bodyMedium,
                 color = SawattColors.TextSecondary,
                 modifier = Modifier.padding(20.dp),
@@ -153,7 +156,7 @@ fun HistoryScreen(container: AppContainer, nav: NavHostController) {
 
         Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             IconButton(onClick = { periodIndex = index + 1 }, enabled = index < periods.lastIndex) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Previous period")
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, stringResource(R.string.history_previous_period))
             }
             Text(
                 periodTitle(p.key),
@@ -162,15 +165,15 @@ fun HistoryScreen(container: AppContainer, nav: NavHostController) {
                 textAlign = TextAlign.Center,
             )
             IconButton(onClick = { periodIndex = index - 1 }, enabled = index > 0) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, "Next period")
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, stringResource(R.string.history_next_period))
             }
         }
 
         Row(Modifier.padding(horizontal = 20.dp)) {
-            StatTile("Time", formatDuration(p.durationSec), Modifier.weight(1f), valueSize = 26.sp)
-            StatTile("Distance", formatDistance(p.distanceKm, profile.units), Modifier.weight(1f), valueSize = 26.sp)
-            StatTile("Avg W", p.avgPowerW.roundToInt().toString(), Modifier.weight(1f), valueSize = 26.sp)
-            StatTile("kcal", p.kcal.roundToInt().toString(), Modifier.weight(1f), valueSize = 26.sp)
+            StatTile(stringResource(R.string.history_time), formatDuration(p.durationSec), Modifier.weight(1f), valueSize = 26.sp)
+            StatTile(stringResource(R.string.history_distance), formatDistance(p.distanceKm, profile.units), Modifier.weight(1f), valueSize = 26.sp)
+            StatTile(stringResource(R.string.history_avg_w), p.avgPowerW.roundToInt().toString(), Modifier.weight(1f), valueSize = 26.sp)
+            StatTile(stringResource(R.string.history_kcal), p.kcal.roundToInt().toString(), Modifier.weight(1f), valueSize = 26.sp)
         }
 
         val bars = buckets(records, p.key)
@@ -182,7 +185,7 @@ fun HistoryScreen(container: AppContainer, nav: NavHostController) {
             labelEvery = if (kind == PeriodKind.MONTH) 7 else 1,
         )
 
-        SectionHeader("${p.workouts} workout" + if (p.workouts > 1) "s" else "")
+        SectionHeader(pluralStringResource(R.plurals.history_workout_count, p.workouts, p.workouts))
         Group {
             recordsIn(records, p.key).forEachIndexed { i, r ->
                 if (i > 0) GroupDivider()
@@ -222,7 +225,7 @@ private fun WorkoutRow(r: WorkoutRecord, units: UnitSystem, onClick: () -> Unit)
     val date = Instant.ofEpochMilli(r.startEpochMs).atZone(zone)
     val locale = Locale.getDefault()
     GroupRow(
-        r.planName ?: "Free ride",
+        r.planName ?: stringResource(R.string.history_free_ride),
         subtitle = "${formatDuration(r.summary.durationSec)} · ${formatDistance(r.summary.distanceKm, units)}",
         onClick = onClick,
         leading = {
@@ -261,13 +264,13 @@ fun HistoryDetailScreen(container: AppContainer, id: String, onBack: () -> Unit)
         topBar = {
             SawattTopBar("", onBack) {
                 record?.let { ExportButton(container.exporter, it) }
-                IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, "Delete") }
+                IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, stringResource(R.string.history_delete)) }
             }
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
             if (record == null) {
-                Text("Workout not found.", Modifier.padding(20.dp))
+                Text(stringResource(R.string.history_not_found), Modifier.padding(20.dp))
             } else {
                 WorkoutDetails(container, record, profile.units, RideMath.effectiveFtp(profile))
             }
@@ -289,18 +292,18 @@ private fun WorkoutDetails(container: AppContainer, r: WorkoutRecord, units: Uni
     Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         Column {
             MetricLabel(date.format(DateTimeFormatter.ofPattern("EEE d MMM · HH:mm", locale)))
-            Text(r.planName ?: "Free ride", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text(r.planName ?: stringResource(R.string.history_free_ride), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         }
 
         val stats: List<@Composable (Modifier) -> Unit> = listOf(
-            { m -> StatTile("Time", formatDuration(s.durationSec), m) },
-            { m -> StatTile("Distance", formatDistance(s.distanceKm, units), m) },
-            { m -> StatTile("Energy", s.kcal.roundToInt().toString(), m, unit = "kcal") },
-            { m -> StatTile("Avg power", s.avgPowerW.roundToInt().toString(), m, unit = "W") },
-            { m -> StatTile("Max power", s.maxPowerW.toString(), m, unit = "W") },
-            { m -> StatTile("Avg cadence", s.avgCadenceRpm.roundToInt().toString(), m, unit = "rpm") },
-            { m -> StatTile("Avg HR", formatOrDash(s.avgHeartRate), m, unit = "bpm") },
-            { m -> StatTile("Max HR", s.maxHeartRate?.toString() ?: "–", m, unit = "bpm") },
+            { m -> StatTile(stringResource(R.string.history_time), formatDuration(s.durationSec), m) },
+            { m -> StatTile(stringResource(R.string.history_distance), formatDistance(s.distanceKm, units), m) },
+            { m -> StatTile(stringResource(R.string.history_energy), s.kcal.roundToInt().toString(), m, unit = "kcal") },
+            { m -> StatTile(stringResource(R.string.history_avg_power), s.avgPowerW.roundToInt().toString(), m, unit = "W") },
+            { m -> StatTile(stringResource(R.string.history_max_power), s.maxPowerW.toString(), m, unit = "W") },
+            { m -> StatTile(stringResource(R.string.history_avg_cadence), s.avgCadenceRpm.roundToInt().toString(), m, unit = "rpm") },
+            { m -> StatTile(stringResource(R.string.history_avg_hr), formatOrDash(s.avgHeartRate), m, unit = "bpm") },
+            { m -> StatTile(stringResource(R.string.history_max_hr), s.maxHeartRate?.toString() ?: "–", m, unit = "bpm") },
         )
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             stats.chunked(3).forEach { row ->
@@ -313,12 +316,12 @@ private fun WorkoutDetails(container: AppContainer, r: WorkoutRecord, units: Uni
 
         samples?.let { tr ->
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                MetricLabel("Power · target dashed")
+                MetricLabel(stringResource(R.string.history_power_chart))
                 PowerChart(tr.powerW, r.intervals)
             }
         }
         SectionCard(Modifier.fillMaxWidth()) {
-            MetricLabel("Intervals")
+            MetricLabel(stringResource(R.string.history_intervals))
             IntervalTable(r.intervals, ftpW)
         }
         ZoneBar(s.zoneSeconds)
@@ -329,8 +332,8 @@ private fun WorkoutDetails(container: AppContainer, r: WorkoutRecord, units: Uni
 private fun DeleteDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Delete workout?") },
-        confirmButton = { TextButton(onClick = onConfirm) { Text("Delete") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        title = { Text(stringResource(R.string.history_delete_title)) },
+        confirmButton = { TextButton(onClick = onConfirm) { Text(stringResource(R.string.history_delete)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.history_cancel)) } },
     )
 }
