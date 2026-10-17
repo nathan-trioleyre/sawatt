@@ -88,7 +88,7 @@ fun PlansScreen(container: AppContainer, nav: NavHostController) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            LargeTitle("Workouts", overline = "FTP ${ftpW.roundToInt()} W", modifier = Modifier.padding(bottom = 6.dp)) {
+            LargeTitle("Workouts", modifier = Modifier.padding(bottom = 6.dp)) {
                 Box(
                     Modifier.size(44.dp).clip(CircleShape).background(SawattColors.SurfaceHigh)
                         .clickable(role = Role.Button) { nav.navigate(Routes.planEditor(null)) },

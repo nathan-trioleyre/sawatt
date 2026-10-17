@@ -193,7 +193,7 @@ private fun DeviceRow(device: DiscoveredDevice, onClick: () -> Unit) {
         device.name,
         value = "${device.rssi} dBm",
         leading = {
-            if (bike) IconTile(SawattIcons.DirectionsBike, SawattColors.Accent) else IconTile(Icons.Default.Favorite, SawattColors.Heart)
+            if (bike) IconTile(SawattIcons.DirectionsBike, SawattColors.Text) else IconTile(Icons.Default.Favorite, SawattColors.Heart)
         },
         onClick = onClick,
     )

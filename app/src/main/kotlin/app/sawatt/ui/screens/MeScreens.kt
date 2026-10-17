@@ -27,7 +27,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,13 +71,13 @@ fun MeScreen(container: AppContainer, nav: NavHostController) {
 
         SectionCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp).fillMaxWidth(), onClick = { nav.navigate(Routes.PROFILE) }) {
             Row {
-                ProfileNumber("FTP", ftpW.roundToInt().toString(), "W", SawattColors.Power, Modifier.weight(1f)) {
+                ProfileNumber("FTP", ftpW.roundToInt().toString(), "W", Modifier.weight(1f)) {
                     if (profile.weightKg > 0) "%.1f W/kg".format(ftpW / profile.weightKg) else ""
                 }
-                ProfileNumber("Max HR", RideMath.effectiveMaxHr(profile).roundToInt().toString(), "bpm", SawattColors.Heart, Modifier.weight(1f)) {
+                ProfileNumber("Max HR", RideMath.effectiveMaxHr(profile).roundToInt().toString(), "bpm", Modifier.weight(1f)) {
                     if (profile.maxHr > 0) "Set by you" else "Estimated"
                 }
-                ProfileNumber("Weight", profile.weightKg.roundToInt().toString(), "kg", SawattColors.TextSecondary, Modifier.weight(1f)) {
+                ProfileNumber("Weight", profile.weightKg.roundToInt().toString(), "kg", Modifier.weight(1f)) {
                     "Edit profile"
                 }
             }
@@ -89,7 +88,7 @@ fun MeScreen(container: AppContainer, nav: NavHostController) {
             GroupRow(
                 "Bike",
                 value = linkStatus(bike),
-                leading = { IconTile(SawattIcons.DirectionsBike, SawattColors.Accent) },
+                leading = { IconTile(SawattIcons.DirectionsBike, SawattColors.Text) },
                 onClick = { nav.navigate(Routes.DEVICES) },
             )
             GroupDivider()
@@ -151,12 +150,11 @@ private fun ProfileNumber(
     label: String,
     value: String,
     unit: String,
-    color: Color,
     modifier: Modifier,
     caption: () -> String,
 ) {
     Column(modifier) {
-        MetricLabel(label, color)
+        MetricLabel(label)
         Metric(value, unit = unit, size = 30.sp)
         Text(caption(), style = MaterialTheme.typography.bodySmall, fontSize = 12.sp, color = SawattColors.TextSecondary)
     }

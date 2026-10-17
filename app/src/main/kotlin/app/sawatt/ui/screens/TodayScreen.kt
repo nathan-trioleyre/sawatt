@@ -1,5 +1,6 @@
 package app.sawatt.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -24,8 +26,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,17 +79,23 @@ fun TodayScreen(container: AppContainer, nav: NavHostController) {
     Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
         LargeTitle("Today", overline = LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.getDefault())))
 
-        Row(Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            DevicePill(SawattIcons.DirectionsBike, SawattColors.Text, "Bike", bike, Modifier.weight(1f)) { nav.navigate(Routes.DEVICES) }
-            DevicePill(Icons.Default.Favorite, SawattColors.Heart, "Heart rate", hr, Modifier.weight(1f)) { nav.navigate(Routes.DEVICES) }
+        Row(
+            Modifier.padding(start = 12.dp, end = 12.dp, top = 8.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .clickable(role = Role.Button) { nav.navigate(Routes.DEVICES) }
+                .padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(20.dp),
+        ) {
+            DeviceStatus(SawattIcons.DirectionsBike, SawattColors.TextSecondary, "Bike", bike)
+            DeviceStatus(Icons.Default.Favorite, SawattColors.Heart, "Heart rate", hr)
         }
 
         SectionCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp).fillMaxWidth(), padding = 20.dp) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     if (idle) {
-                        MetricLabel("Free ride", SawattColors.Accent)
-                        Text("Just ride.\nPress Lap to split.", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                        Text("Free ride", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                        Text("Press Lap to split", style = MaterialTheme.typography.bodyMedium, color = SawattColors.TextSecondary)
                     } else {
                         MetricLabel(if (workout.status == WorkoutStatus.PAUSED) "Workout paused" else "Workout in progress", SawattColors.Pause)
                         Text(workout.plan?.name ?: "Free ride", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
@@ -121,62 +133,47 @@ fun TodayScreen(container: AppContainer, nav: NavHostController) {
         SectionHeader("This week", action = "History") { nav.openTab(Routes.HISTORY) }
         val week = currentPeriod(PeriodKind.WEEK)
         val weekRecords = recordsIn(records, week)
-        SectionCard(Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
-            Row(verticalAlignment = Alignment.Bottom) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Column {
+                    MetricLabel("Time")
+                    Metric(formatDuration(weekRecords.sumOf { it.summary.durationSec }), size = 30.sp)
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Column {
-                        MetricLabel("Time")
-                        Metric(formatDuration(weekRecords.sumOf { it.summary.durationSec }), size = 30.sp)
+                        MetricLabel("Rides")
+                        Metric(weekRecords.size.toString(), size = 22.sp)
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        Column {
-                            MetricLabel("Rides")
-                            Metric(weekRecords.size.toString(), size = 22.sp)
-                        }
-                        Column {
-                            MetricLabel("kcal")
-                            Metric(weekRecords.sumOf { it.summary.kcal }.roundToInt().toString(), size = 22.sp)
-                        }
+                    Column {
+                        MetricLabel("kcal")
+                        Metric(weekRecords.sumOf { it.summary.kcal }.roundToInt().toString(), size = 22.sp)
                     }
                 }
-                Spacer(Modifier.width(16.dp))
-                PeriodBars(
-                    buckets(records, week),
-                    modifier = Modifier.weight(1f),
-                    barColor = { if (it.isCurrent) SawattColors.Accent else SawattColors.Chevron },
-                )
             }
+            Spacer(Modifier.width(16.dp))
+            PeriodBars(
+                buckets(records, week),
+                modifier = Modifier.weight(1f),
+                barColor = { if (it.isCurrent) SawattColors.Accent else SawattColors.Chevron },
+            )
         }
     }
 }
 
 @Composable
-private fun DevicePill(
-    icon: ImageVector,
-    tint: Color,
-    title: String,
-    link: DeviceLink?,
-    modifier: Modifier,
-    onClick: () -> Unit,
-) {
+private fun DeviceStatus(icon: ImageVector, tint: Color, title: String, link: DeviceLink?) {
     val (status, color) = when (link?.state) {
-        null -> "Not connected" to SawattColors.TextSecondary
+        null -> "Not connected" to SawattColors.Muted
         LinkState.CONNECTING -> "Connecting…" to SawattColors.Pause
         LinkState.CONNECTED -> "Connected" to SawattColors.Accent
         LinkState.RECONNECTING -> "Waiting…" to SawattColors.Pause
     }
-    SectionCard(modifier, onClick = onClick, padding = 12.dp) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(22.dp))
-            Spacer(Modifier.width(10.dp))
-            Column {
-                Text(title, style = MaterialTheme.typography.titleSmall)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    StatusDot(color)
-                    Spacer(Modifier.width(5.dp))
-                    Text(status, style = MaterialTheme.typography.bodySmall, fontSize = 12.sp, color = color)
-                }
-            }
-        }
+    Row(
+        Modifier.semantics(mergeDescendants = true) { contentDescription = "$title: $status" },
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(6.dp))
+        StatusDot(color)
     }
 }

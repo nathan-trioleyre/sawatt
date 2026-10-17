@@ -109,10 +109,10 @@ fun SwitchRow(title: String, checked: Boolean, subtitle: String? = null, onChang
     }
 }
 
-/** Coloured rounded square holding a row's icon. */
+/** A row's icon, tinted with [color]. */
 @Composable
-fun IconTile(icon: ImageVector, color: Color, tint: Color = SawattColors.OnAccent) {
-    Box(Modifier.size(30.dp).clip(RoundedCornerShape(8.dp)).background(color), contentAlignment = Alignment.Center) {
-        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))
+fun IconTile(icon: ImageVector, color: Color) {
+    Box(Modifier.size(30.dp), contentAlignment = Alignment.Center) {
+        Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
     }
 }

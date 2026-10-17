@@ -169,7 +169,7 @@ fun HistoryScreen(container: AppContainer, nav: NavHostController) {
         Row(Modifier.padding(horizontal = 20.dp)) {
             StatTile("Time", formatDuration(p.durationSec), Modifier.weight(1f), valueSize = 26.sp)
             StatTile("Distance", formatDistance(p.distanceKm, profile.units), Modifier.weight(1f), valueSize = 26.sp)
-            StatTile("Avg W", p.avgPowerW.roundToInt().toString(), Modifier.weight(1f), labelColor = SawattColors.Power, valueSize = 26.sp)
+            StatTile("Avg W", p.avgPowerW.roundToInt().toString(), Modifier.weight(1f), valueSize = 26.sp)
             StatTile("kcal", p.kcal.roundToInt().toString(), Modifier.weight(1f), valueSize = 26.sp)
         }
 
@@ -296,11 +296,11 @@ private fun WorkoutDetails(container: AppContainer, r: WorkoutRecord, units: Uni
             { m -> StatTile("Time", formatDuration(s.durationSec), m) },
             { m -> StatTile("Distance", formatDistance(s.distanceKm, units), m) },
             { m -> StatTile("Energy", s.kcal.roundToInt().toString(), m, unit = "kcal") },
-            { m -> StatTile("Avg power", s.avgPowerW.roundToInt().toString(), m, unit = "W", labelColor = SawattColors.Power) },
-            { m -> StatTile("Max power", s.maxPowerW.toString(), m, unit = "W", labelColor = SawattColors.Power) },
-            { m -> StatTile("Avg cadence", s.avgCadenceRpm.roundToInt().toString(), m, unit = "rpm", labelColor = SawattColors.Cadence) },
-            { m -> StatTile("Avg HR", formatOrDash(s.avgHeartRate), m, unit = "bpm", labelColor = SawattColors.Heart) },
-            { m -> StatTile("Max HR", s.maxHeartRate?.toString() ?: "–", m, unit = "bpm", labelColor = SawattColors.Heart) },
+            { m -> StatTile("Avg power", s.avgPowerW.roundToInt().toString(), m, unit = "W") },
+            { m -> StatTile("Max power", s.maxPowerW.toString(), m, unit = "W") },
+            { m -> StatTile("Avg cadence", s.avgCadenceRpm.roundToInt().toString(), m, unit = "rpm") },
+            { m -> StatTile("Avg HR", formatOrDash(s.avgHeartRate), m, unit = "bpm") },
+            { m -> StatTile("Max HR", s.maxHeartRate?.toString() ?: "–", m, unit = "bpm") },
         )
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             stats.chunked(3).forEach { row ->
