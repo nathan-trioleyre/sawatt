@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ftp_test_name">Test FTP</string>
+    <string name="ftp_step_warm_up">Échauffement</string>
+    <string name="ftp_step_spin_up">Vélocité</string>
+    <string name="ftp_step_easy">Facile</string>
+    <string name="ftp_step_opener">Ouverture</string>
+    <string name="ftp_step_recovery">Récup</string>
+    <string name="ftp_step_all_out">À fond</string>
+    <string name="ftp_step_cool_down">Retour au calme</string>
+
+    <string name="ftp_target_all_out">À fond</string>
+    <string name="ftp_all_out_hint">Tiens la puissance la plus haute possible</string>
+
+    <string name="ftp_entry_title">Teste ta FTP</string>
+    <string name="ftp_entry_subtitle">Test guidé de 66 min, dont 20 min à fond</string>
+
+    <string name="ftp_result_title">Test FTP</string>
+    <string name="ftp_result_avg">Moyenne sur 20 min</string>
+    <string name="ftp_result_estimate">FTP estimée</string>
+    <string name="ftp_result_explain">Ta FTP vaut 95 % de la puissance tenue pendant l\'effort de 20 minutes.</string>
+    <string name="ftp_result_current">FTP actuelle : %1$d W</string>
+    <string name="ftp_result_set">En faire ma FTP (%1$d W → %2$d W)</string>
+    <string name="ftp_result_saved">Enregistrée comme ta FTP</string>
+    <string name="ftp_result_incomplete">Test incomplet : l\'effort de 20 minutes n\'a pas été mené à son terme, la FTP ne peut pas être estimée.</string>
+</resources>
