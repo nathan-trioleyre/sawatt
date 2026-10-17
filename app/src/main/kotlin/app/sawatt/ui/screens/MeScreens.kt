@@ -50,6 +50,7 @@ import app.sawatt.core.model.UnitSystem
 import app.sawatt.core.ride.RideMath
 import app.sawatt.core.trainer.DeviceLink
 import app.sawatt.core.trainer.LinkState
+import app.sawatt.core.workout.FtpTest
 import app.sawatt.ui.Routes
 import app.sawatt.ui.components.Group
 import app.sawatt.ui.components.GroupDivider
@@ -100,6 +101,13 @@ fun MeScreen(container: AppContainer, nav: NavHostController) {
                     Modifier.weight(1f),
                 )
             }
+        }
+        Group(Modifier.padding(top = 10.dp)) {
+            GroupRow(
+                stringResource(R.string.ftp_entry_title),
+                subtitle = stringResource(R.string.ftp_entry_subtitle),
+                onClick = { nav.navigate(Routes.workout(FtpTest.PLAN_ID)) },
+            )
         }
 
         GroupHeader(stringResource(R.string.me_devices))

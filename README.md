@@ -43,6 +43,8 @@ block, whether you are on target.
 
 ### Train on your numbers
 - Enter your FTP and max heart rate, or let SaWatt estimate them from your profile.
+- Or measure your FTP with the guided **FTP test** (Me → Test your FTP): a 66-minute session with
+  20 minutes all out, then save the result to your profile in one tap.
 - Metric or imperial units.
 - In English or French: SaWatt follows your phone's language, or the one you pick in **Me → Language**.
 
@@ -99,7 +101,7 @@ attached to each pull request's CI run, or build it yourself: see
 ## Roadmap
 
 - Data backup and restore.
-- FTP test, VO2max test, levels and weekly challenges.
+- VO2max test, levels and weekly challenges.
 
 ## Contributing
 

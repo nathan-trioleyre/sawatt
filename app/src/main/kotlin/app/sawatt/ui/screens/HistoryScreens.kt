@@ -22,6 +22,8 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +56,7 @@ import app.sawatt.core.history.HistoryStats
 import app.sawatt.core.history.PeriodKind
 import app.sawatt.core.model.UnitSystem
 import app.sawatt.core.ride.RideMath
+import app.sawatt.core.workout.FtpTest
 import app.sawatt.core.workout.WorkoutRecord
 import app.sawatt.core.workout.WorkoutSamples
 import app.sawatt.ui.Routes
@@ -295,6 +298,10 @@ private fun WorkoutDetails(container: AppContainer, r: WorkoutRecord, units: Uni
             Text(r.planName ?: stringResource(R.string.history_free_ride), style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
         }
 
+        FtpTest.result(r)?.let { result ->
+            FtpTestResult(result, currentFtpW = ftpW.roundToInt()) { new -> container.settings.updateProfile { it.copy(ftpW = new) } }
+        }
+
         val stats: List<@Composable (Modifier) -> Unit> = listOf(
             { m -> StatTile(stringResource(R.string.history_time), formatDuration(s.durationSec), m) },
             { m -> StatTile(stringResource(R.string.history_distance), formatDistance(s.distanceKm, units), m) },
@@ -325,6 +332,33 @@ private fun WorkoutDetails(container: AppContainer, r: WorkoutRecord, units: Uni
             IntervalTable(r.intervals, ftpW)
         }
         ZoneBar(s.zoneSeconds)
+    }
+}
+
+/** The FTP estimated by an FTP test, with a way to save it to the profile. */
+@Composable
+private fun FtpTestResult(result: FtpTest.Result, currentFtpW: Int, onSave: (Int) -> Unit) {
+    SectionCard(Modifier.fillMaxWidth(), spacing = 10.dp) {
+        MetricLabel(stringResource(R.string.ftp_result_title))
+        if (!result.complete) {
+            Text(stringResource(R.string.ftp_result_incomplete), style = MaterialTheme.typography.bodyMedium, color = SawattColors.TextSecondary)
+            return@SectionCard
+        }
+        Row {
+            StatTile(stringResource(R.string.ftp_result_estimate), result.ftpW.toString(), Modifier.weight(1f), unit = "W", valueSize = 34.sp)
+            StatTile(stringResource(R.string.ftp_result_avg), result.avgPowerW.roundToInt().toString(), Modifier.weight(1f), unit = "W", valueSize = 34.sp)
+        }
+        Text(stringResource(R.string.ftp_result_explain), style = MaterialTheme.typography.bodySmall, color = SawattColors.TextSecondary)
+        if (result.ftpW == currentFtpW) {
+            Text(stringResource(R.string.ftp_result_saved), style = MaterialTheme.typography.bodyMedium, color = SawattColors.Accent)
+        } else {
+            Text(stringResource(R.string.ftp_result_current, currentFtpW), style = MaterialTheme.typography.bodySmall, color = SawattColors.TextSecondary)
+            Button(
+                onClick = { onSave(result.ftpW) },
+                colors = ButtonDefaults.buttonColors(containerColor = SawattColors.Accent, contentColor = SawattColors.OnAccent),
+                modifier = Modifier.fillMaxWidth(),
+            ) { Text(stringResource(R.string.ftp_result_set, currentFtpW, result.ftpW), fontWeight = FontWeight.SemiBold) }
+        }
     }
 }
 

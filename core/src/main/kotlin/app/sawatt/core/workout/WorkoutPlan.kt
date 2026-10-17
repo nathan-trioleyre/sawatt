@@ -15,6 +15,9 @@ sealed interface PlanStep
  * The power target is either absolute ([targetPowerW]) or relative to the rider's FTP
  * ([targetFtpPercent]); exactly one of them is set. A percentage is converted to watts with the
  * rider's FTP when the workout starts, so a plan keeps working as the FTP improves.
+ *
+ * An [allOut] block has no power target: the rider holds the highest power they can sustain, as in
+ * the effort of an FTP test.
  */
 @Serializable
 @SerialName("block")
@@ -24,21 +27,44 @@ data class Block(
     val targetPowerW: Int? = null,
     val targetCadenceRpm: Int? = null,
     val targetFtpPercent: Int? = null,
+    val allOut: Boolean = false,
 ) : PlanStep {
     init {
-        require((targetPowerW == null) != (targetFtpPercent == null)) {
-            "A block needs exactly one power target: watts or % of FTP"
+        if (allOut) {
+            require(targetPowerW == null && targetFtpPercent == null) { "An all-out block has no power target" }
+        } else {
+            require((targetPowerW == null) != (targetFtpPercent == null)) {
+                "A block needs exactly one power target: watts or % of FTP"
+            }
         }
     }
 
-    /** Target power in watts for a rider with the given FTP. */
-    fun targetWatts(ftpW: Double): Int = targetPowerW ?: (ftpW * targetFtpPercent!! / 100).roundToInt()
+    /** Target power in watts for a rider with the given FTP; null for an [allOut] block. */
+    fun targetWatts(ftpW: Double): Int? = when {
+        allOut -> null
+        targetPowerW != null -> targetPowerW
+        else -> (ftpW * targetFtpPercent!! / 100).roundToInt()
+    }
 
-    /** "250 W", or "75% FTP" ("75% FTP (188 W)" when [ftpW] is known). */
+    /** Intensity in % of FTP, used to colour and size the block in plan profiles. */
+    fun intensityPercent(ftpW: Double): Double = when {
+        allOut -> ALL_OUT_INTENSITY_PERCENT
+        targetFtpPercent != null -> targetFtpPercent.toDouble()
+        ftpW > 0 -> targetPowerW!! * 100 / ftpW
+        else -> 0.0
+    }
+
+    /** "250 W", or "75% FTP" ("75% FTP (188 W)" when [ftpW] is known), or "All out". */
     fun targetLabel(ftpW: Double? = null): String = when {
+        allOut -> "All out"
         targetPowerW != null -> "$targetPowerW W"
         ftpW == null -> "$targetFtpPercent% FTP"
         else -> "$targetFtpPercent% FTP (${targetWatts(ftpW)} W)"
+    }
+
+    companion object {
+        /** An all-out effort is drawn like a block slightly above FTP. */
+        const val ALL_OUT_INTENSITY_PERCENT = 110.0
     }
 }
 

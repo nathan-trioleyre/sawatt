@@ -57,11 +57,15 @@ import app.sawatt.R
 import app.sawatt.core.model.UnitSystem
 import app.sawatt.core.ride.RideMath
 import app.sawatt.core.trainer.LinkState
+import app.sawatt.core.workout.Block
 import app.sawatt.core.workout.CurrentInterval
+import app.sawatt.core.workout.FtpTest
 import app.sawatt.core.workout.IntervalKind
 import app.sawatt.core.workout.LiveState
 import app.sawatt.core.workout.WorkoutPlan
+import app.sawatt.ui.blockTargetLabel
 import app.sawatt.ui.intervalName
+import app.sawatt.ui.rememberFtpTestPlan
 import app.sawatt.ui.components.IconTile
 import app.sawatt.ui.components.IntervalTable
 import app.sawatt.ui.components.Metric
@@ -100,7 +104,10 @@ fun WorkoutScreen(
     val bike by container.trainer.bike.collectAsStateWithLifecycle()
     val hr by container.trainer.heartRateSensor.collectAsStateWithLifecycle()
     val plans by container.plans.plans.collectAsStateWithLifecycle()
-    val plan: WorkoutPlan? = state.plan ?: planId?.let { id -> plans.firstOrNull { it.id == id } }
+    val ftpTest = rememberFtpTestPlan()
+    val plan: WorkoutPlan? = state.plan ?: planId?.let { id ->
+        if (id == FtpTest.PLAN_ID) ftpTest else plans.firstOrNull { it.id == id }
+    }
     val live = state.live
     val ftpW = live?.ftpW ?: RideMath.effectiveFtp(profile)
     var confirmDiscard by remember { mutableStateOf(false) }
@@ -211,18 +218,19 @@ private fun Idle(plan: WorkoutPlan?, ftpW: Double, readings: SensorReadings, bik
     )
     if (plan != null) {
         SectionCard(Modifier.fillMaxWidth(), spacing = 10.dp) {
-            Text(plan.name, style = MaterialTheme.typography.titleMedium)
             PlanProfile(plan.flatten(), ftpW, height = 56.dp)
             plan.flatten().forEach { p ->
-                val pct = p.block.targetFtpPercent?.toDouble() ?: if (ftpW > 0) p.block.targetWatts(ftpW) * 100 / ftpW else 0.0
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(Modifier.size(8.dp).clip(CircleShape).background(zoneColor(pct)))
+                    Box(Modifier.size(8.dp).clip(CircleShape).background(zoneColor(p.block.intensityPercent(ftpW))))
                     Spacer(Modifier.width(10.dp))
                     Text(p.label, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
                     val rpm = stringResource(R.string.workout_unit_rpm)
                     val cadence = p.block.targetCadenceRpm?.let { " · $it $rpm" } ?: ""
                     Text(
-                        stringResource(R.string.workout_block_line, formatDuration(p.block.durationSec), p.block.targetLabel(ftpW)) + cadence,
+                        stringResource(
+                            if (p.block.allOut) R.string.workout_block_line_all_out else R.string.workout_block_line,
+                            formatDuration(p.block.durationSec), blockTargetLabel(p.block, ftpW),
+                        ) + cadence,
                         style = MaterialTheme.typography.bodySmall,
                         color = SawattColors.TextSecondary,
                     )
@@ -296,7 +304,10 @@ private fun Live(live: LiveState, plan: WorkoutPlan?, readings: SensorReadings, 
     }
     live.next?.let { n ->
         Text(
-            stringResource(R.string.workout_next, n.label, formatDuration(n.block.durationSec), n.block.targetLabel(live.ftpW)),
+            stringResource(
+                if (n.block.allOut) R.string.workout_next_all_out else R.string.workout_next,
+                n.label, formatDuration(n.block.durationSec), blockTargetLabel(n.block, live.ftpW),
+            ),
             style = MaterialTheme.typography.bodyMedium,
             color = SawattColors.TextSecondary,
         )
@@ -305,7 +316,7 @@ private fun Live(live: LiveState, plan: WorkoutPlan?, readings: SensorReadings, 
         Text(stringResource(R.string.workout_plan_completed), style = MaterialTheme.typography.bodyMedium, color = SawattColors.OnTarget)
     }
 
-    SectionCard(Modifier.fillMaxWidth()) {
+    Column(Modifier.fillMaxWidth().padding(top = 4.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         MetricLabel(stringResource(R.string.workout_whole_workout))
         val s = live.session
         Row {
@@ -326,28 +337,32 @@ private fun Live(live: LiveState, plan: WorkoutPlan?, readings: SensorReadings, 
 @Composable
 private fun IntervalHeader(c: CurrentInterval, live: LiveState) {
     Row(Modifier.fillMaxWidth().padding(top = 8.dp), verticalAlignment = Alignment.Bottom) {
-        Column(Modifier.weight(1f)) {
-            val target = c.targetPowerW
-            val zone = c.targetFtpPercent?.toDouble() ?: if (target != null && live.ftpW > 0) target * 100 / live.ftpW else null
-            MetricLabel(
-                if (c.kind == IntervalKind.PLANNED) {
-                    stringResource(R.string.workout_interval_of, c.index, live.plannedCount)
-                } else {
-                    stringResource(R.string.workout_lap_n, c.index)
-                },
-                zone?.let(::zoneColor) ?: SawattColors.Accent,
-            )
+        val target = c.targetPowerW
+        val zone = when {
+            c.allOut -> Block.ALL_OUT_INTENSITY_PERCENT
+            target != null && live.ftpW > 0 -> c.targetFtpPercent?.toDouble() ?: (target * 100 / live.ftpW)
+            else -> c.targetFtpPercent?.toDouble()
+        }
+        Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+            // The zone colour, which the removed "Interval 1 of 12" line used to carry.
+            Box(Modifier.size(10.dp).clip(CircleShape).background(zone?.let(::zoneColor) ?: SawattColors.Accent))
+            Spacer(Modifier.width(10.dp))
             Text(intervalName(c.name, c.kind), style = MaterialTheme.typography.titleLarge, fontSize = 26.sp)
         }
-        if (c.targetPowerW != null) {
-            SectionCard(padding = 10.dp, spacing = 0.dp) {
+        if (target != null) {
+            Column(horizontalAlignment = Alignment.End) {
                 MetricLabel(stringResource(R.string.workout_target))
                 Metric(
-                    c.targetPowerW.toString(),
+                    target.toString(),
                     unit = "W" + (c.targetFtpPercent?.let { " · $it%" } ?: "") +
                         (c.targetCadenceRpm?.let { " · $it ${stringResource(R.string.workout_unit_rpm)}" } ?: ""),
                     size = 24.sp,
                 )
+            }
+        } else if (c.allOut) {
+            Column(horizontalAlignment = Alignment.End) {
+                MetricLabel(stringResource(R.string.workout_target))
+                Text(stringResource(R.string.ftp_target_all_out), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -360,6 +375,7 @@ private fun IntervalRing(c: CurrentInterval, status: WorkoutStatus) {
     val color = targetColor(avg, c.targetPowerW) ?: SawattColors.Text
     val progress = c.plannedDurationSec?.let { (c.elapsedSec.toFloat() / it).coerceIn(0f, 1f) }
     val verdict = when {
+        c.allOut -> stringResource(R.string.ftp_all_out_hint)
         c.targetPowerW == null -> "W"
         color == SawattColors.Below -> stringResource(R.string.workout_below_target)
         color == SawattColors.Above -> stringResource(R.string.workout_above_target)

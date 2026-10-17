@@ -28,11 +28,7 @@ fun PlanProfile(
     progressSec: Int? = null,
 ) {
     val bars = remember(intervals, ftpW) {
-        intervals.map { p ->
-            val pct = p.block.targetFtpPercent?.toDouble()
-                ?: if (ftpW > 0) p.block.targetWatts(ftpW) * 100 / ftpW else 0.0
-            p.block.durationSec to pct
-        }
+        intervals.map { p -> p.block.durationSec to p.block.intensityPercent(ftpW) }
     }
     val total = bars.sumOf { it.first }
     if (total <= 0) return
