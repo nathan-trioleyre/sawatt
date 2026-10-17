@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="onboarding_title">Bienvenue sur SaWatt</string>
+    <string name="onboarding_text">Quelques infos pour estimer ta FTP et tes zones cardio. Elles restent sur ce téléphone, et tu pourras les modifier dans Moi → Profil.</string>
+    <string name="onboarding_start">C\'est parti</string>
+</resources>

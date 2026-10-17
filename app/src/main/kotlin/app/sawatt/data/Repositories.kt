@@ -22,17 +22,24 @@ class SettingsRepository(private val store: JsonStore, private val scope: Corout
     private val _app = MutableStateFlow(AppSettings())
     val app: StateFlow<AppSettings> = _app.asStateFlow()
 
+    /** Whether a profile was ever saved, i.e. the first launch is over; null until read from disk. */
+    private val _profileSaved = MutableStateFlow<Boolean?>(null)
+    val profileSaved: StateFlow<Boolean?> = _profileSaved.asStateFlow()
+
     private val writeLock = Mutex()
 
     init {
         scope.launch {
-            store.read(PROFILE, UserProfile.serializer())?.let { _profile.value = it }
+            val saved = store.read(PROFILE, UserProfile.serializer())
+            saved?.let { _profile.value = it }
+            _profileSaved.value = saved != null
             store.read(APP, AppSettings.serializer())?.let { _app.value = it }
         }
     }
 
     fun updateProfile(transform: (UserProfile) -> UserProfile) {
         _profile.update(transform)
+        _profileSaved.value = true
         val value = _profile.value
         scope.launch { writeLock.withLock { store.write(PROFILE, UserProfile.serializer(), value) } }
     }

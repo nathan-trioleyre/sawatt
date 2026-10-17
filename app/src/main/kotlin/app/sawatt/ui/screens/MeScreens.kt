@@ -12,21 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -45,7 +38,6 @@ import androidx.navigation.NavHostController
 import app.sawatt.AppContainer
 import app.sawatt.AppLanguage
 import app.sawatt.R
-import app.sawatt.core.model.Gender
 import app.sawatt.core.model.UnitSystem
 import app.sawatt.core.ride.RideMath
 import app.sawatt.core.trainer.DeviceLink
@@ -60,12 +52,12 @@ import app.sawatt.ui.components.IconTile
 import app.sawatt.ui.components.LargeTitle
 import app.sawatt.ui.components.Metric
 import app.sawatt.ui.components.MetricLabel
+import app.sawatt.ui.components.ProfileForm
 import app.sawatt.ui.components.SawattIcons
 import app.sawatt.ui.components.SawattTopBar
 import app.sawatt.ui.components.SectionCard
 import app.sawatt.ui.components.SwitchRow
 import app.sawatt.ui.theme.SawattColors
-import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -231,93 +223,15 @@ private fun linkStatus(link: DeviceLink?): Int = when (link?.state) {
     LinkState.RECONNECTING -> R.string.me_link_waiting
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(container: AppContainer, onBack: () -> Unit) {
     val profile by container.settings.profile.collectAsStateWithLifecycle()
-    val update = container.settings::updateProfile
 
     Scaffold(containerColor = SawattColors.Background, topBar = { SawattTopBar(stringResource(R.string.me_profile), onBack) }) { padding ->
-        Column(
-            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp),
-        ) {
-            MetricLabel(stringResource(R.string.me_training))
-            NumberSetting(
-                stringResource(R.string.me_ftp_setting),
-                profile.ftpW,
-                supporting = stringResource(R.string.me_estimated_watts, RideMath.estimatedFtp(profile).roundToInt()),
-            ) { v -> if (v in 0..999) update { it.copy(ftpW = v) } }
-            NumberSetting(
-                stringResource(R.string.me_max_hr_setting),
-                profile.maxHr,
-                supporting = stringResource(R.string.me_estimated_bpm, RideMath.estimatedMaxHr(RideMath.age(profile.birthDate)).roundToInt()),
-            ) { v -> if (v in 0..250) update { it.copy(maxHr = v) } }
-            Choice(stringResource(R.string.me_training_per_week), listOf("1-3 h", "3-5 h", "5-8 h", "8+ h"), profile.trainingLevel) { i ->
-                update { it.copy(trainingLevel = i) }
-            }
-
-            MetricLabel(stringResource(R.string.me_you), modifier = Modifier.padding(top = 8.dp))
-            Choice(stringResource(R.string.me_gender), listOf(stringResource(R.string.me_male), stringResource(R.string.me_female)), if (profile.gender == Gender.MALE) 0 else 1) { i ->
-                update { it.copy(gender = if (i == 0) Gender.MALE else Gender.FEMALE) }
-            }
-            TextSetting(stringResource(R.string.me_birth_date), profile.birthDate.toString(), KeyboardType.Text) { text ->
-                runCatching { LocalDate.parse(text) }.getOrNull()?.let { d -> update { it.copy(birthDate = d) } }
-            }
-            NumberSetting(stringResource(R.string.me_weight_setting), profile.weightKg.roundToInt()) { v -> if (v in 30..300) update { it.copy(weightKg = v.toDouble()) } }
-            NumberSetting(stringResource(R.string.me_height_setting), profile.heightCm.roundToInt()) { v -> if (v in 120..250) update { it.copy(heightCm = v.toDouble()) } }
-        }
+        ProfileForm(
+            profile,
+            onChange = container.settings::updateProfile,
+            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 20.dp, vertical = 8.dp),
+        )
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun Choice(title: String, options: List<String>, selected: Int, onSelect: (Int) -> Unit) {
-    Column {
-        Text(title, style = MaterialTheme.typography.bodyMedium, color = SawattColors.TextSecondary, modifier = Modifier.padding(bottom = 6.dp))
-        SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-            options.forEachIndexed { i, label ->
-                SegmentedButton(
-                    selected = i == selected,
-                    onClick = { onSelect(i) },
-                    shape = SegmentedButtonDefaults.itemShape(i, options.size),
-                    colors = SegmentedButtonDefaults.colors(
-                        activeContainerColor = SawattColors.Accent.copy(alpha = 0.18f),
-                        activeContentColor = SawattColors.Accent,
-                        activeBorderColor = SawattColors.Hairline,
-                        inactiveContainerColor = SawattColors.Surface,
-                        inactiveContentColor = SawattColors.TextSecondary,
-                        inactiveBorderColor = SawattColors.Hairline,
-                    ),
-                ) { Text(label, maxLines = 1) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun NumberSetting(label: String, value: Int, supporting: String? = null, onValid: (Int) -> Unit) {
-    TextSetting(label, value.toString(), KeyboardType.Number, supporting) { text -> text.toIntOrNull()?.let(onValid) }
-}
-
-@Composable
-private fun TextSetting(
-    label: String,
-    value: String,
-    keyboard: KeyboardType,
-    supporting: String? = null,
-    onChange: (String) -> Unit,
-) {
-    // Local text so partial input ("", "7") is allowed; valid values are pushed up as they are typed.
-    // Keyed on the stored value so it refreshes when settings finish loading from disk.
-    var text by remember(value) { mutableStateOf(value) }
-    OutlinedTextField(
-        value = text,
-        onValueChange = { text = it; onChange(it) },
-        label = { Text(label) },
-        supportingText = supporting?.let { { Text(it) } },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = keyboard),
-        modifier = Modifier.fillMaxWidth(),
-    )
 }
