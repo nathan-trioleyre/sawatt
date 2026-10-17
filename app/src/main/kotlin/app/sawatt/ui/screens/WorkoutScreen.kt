@@ -227,7 +227,10 @@ private fun Idle(plan: WorkoutPlan?, ftpW: Double, readings: SensorReadings, bik
                     val rpm = stringResource(R.string.workout_unit_rpm)
                     val cadence = p.block.targetCadenceRpm?.let { " · $it $rpm" } ?: ""
                     Text(
-                        stringResource(R.string.workout_block_line, formatDuration(p.block.durationSec), blockTargetLabel(p.block, ftpW)) + cadence,
+                        stringResource(
+                            if (p.block.allOut) R.string.workout_block_line_all_out else R.string.workout_block_line,
+                            formatDuration(p.block.durationSec), blockTargetLabel(p.block, ftpW),
+                        ) + cadence,
                         style = MaterialTheme.typography.bodySmall,
                         color = SawattColors.TextSecondary,
                     )
@@ -301,7 +304,10 @@ private fun Live(live: LiveState, plan: WorkoutPlan?, readings: SensorReadings, 
     }
     live.next?.let { n ->
         Text(
-            stringResource(R.string.workout_next, n.label, formatDuration(n.block.durationSec), blockTargetLabel(n.block, live.ftpW)),
+            stringResource(
+                if (n.block.allOut) R.string.workout_next_all_out else R.string.workout_next,
+                n.label, formatDuration(n.block.durationSec), blockTargetLabel(n.block, live.ftpW),
+            ),
             style = MaterialTheme.typography.bodyMedium,
             color = SawattColors.TextSecondary,
         )

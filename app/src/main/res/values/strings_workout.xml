@@ -29,6 +29,9 @@
     <string name="workout_elapsed">elapsed</string>
     <string name="workout_max_interval">Max · interval</string>
     <string name="workout_next">Next  %1$s · %2$s @ %3$s</string>
+    <!-- An all-out block has no target: "20:00 · All out" rather than "20:00 @ All out". -->
+    <string name="workout_block_line_all_out">%1$s · %2$s</string>
+    <string name="workout_next_all_out">Next  %1$s · %2$s · %3$s</string>
     <string name="workout_plan_completed">Plan completed — keep riding or press Finish.</string>
     <string name="workout_whole_workout">Whole workout</string>
     <string name="workout_avg_power">Avg power</string>

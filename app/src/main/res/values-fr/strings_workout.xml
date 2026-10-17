@@ -29,6 +29,9 @@
     <string name="workout_elapsed">écoulé</string>
     <string name="workout_max_interval">Max · intervalle</string>
     <string name="workout_next">Ensuite  %1$s · %2$s à %3$s</string>
+    <!-- An all-out block has no target: "20:00 · All out" rather than "20:00 @ All out". -->
+    <string name="workout_block_line_all_out">%1$s · %2$s</string>
+    <string name="workout_next_all_out">Ensuite  %1$s · %2$s · %3$s</string>
     <string name="workout_plan_completed">Plan terminé — continue ou appuie sur Terminer.</string>
     <string name="workout_whole_workout">Séance complète</string>
     <string name="workout_avg_power">Puissance moy.</string>
