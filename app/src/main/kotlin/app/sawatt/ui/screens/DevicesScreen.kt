@@ -7,28 +7,24 @@ import android.os.Build
 import android.bluetooth.BluetoothAdapter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,6 +33,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -46,6 +44,11 @@ import app.sawatt.core.trainer.DeviceLink
 import app.sawatt.core.trainer.DeviceType
 import app.sawatt.core.trainer.DiscoveredDevice
 import app.sawatt.core.trainer.LinkState
+import app.sawatt.ui.components.Group
+import app.sawatt.ui.components.GroupDivider
+import app.sawatt.ui.components.GroupHeader
+import app.sawatt.ui.components.GroupRow
+import app.sawatt.ui.components.IconTile
 import app.sawatt.ui.components.SawattIcons
 import app.sawatt.ui.components.SawattTopBar
 import app.sawatt.ui.theme.SawattColors
@@ -103,39 +106,58 @@ fun DevicesScreen(container: AppContainer, onBack: () -> Unit) {
 
     LaunchedEffect(Unit) { requestScan() }
 
-    Scaffold(topBar = { SawattTopBar("Connect devices", onBack) }) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            LinkCard("Bike", bike, extra = bike?.let { "${readings.powerW} W · ${readings.cadenceRpm} rpm" + (it.firmware?.let { f -> " · fw $f" } ?: "") }) {
-                trainer.disconnect(DeviceType.BIKE)
-                if (!simulated) container.settings.updateApp { it.copy(defaultBike = null) }
-            }
-            LinkCard("Heart rate", hr, extra = hr?.let { "${readings.heartRate} bpm" }) {
-                trainer.disconnect(DeviceType.HEART_RATE)
-                if (!simulated) container.settings.updateApp { it.copy(defaultHrSensor = null) }
+    Scaffold(containerColor = SawattColors.Background, topBar = { SawattTopBar("Devices", onBack) }) { padding ->
+        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
+            GroupHeader("Connected", Modifier.padding(top = 0.dp))
+            Group {
+                LinkRow(SawattIcons.DirectionsBike, SawattColors.Accent, "Bike", bike, bike?.let {
+                    "${readings.powerW} W · ${readings.cadenceRpm} rpm" + (it.firmware?.let { f -> " · fw $f" } ?: "")
+                }) {
+                    trainer.disconnect(DeviceType.BIKE)
+                    if (!simulated) container.settings.updateApp { it.copy(defaultBike = null) }
+                }
+                GroupDivider()
+                LinkRow(Icons.Default.Favorite, SawattColors.Heart, "Heart-rate strap", hr, hr?.let { "${readings.heartRate} bpm" }) {
+                    trainer.disconnect(DeviceType.HEART_RATE)
+                    if (!simulated) container.settings.updateApp { it.copy(defaultHrSensor = null) }
+                }
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
                 Button(onClick = ::requestScan, enabled = !scanning) { Text(if (scanning) "Scanning…" else "Scan") }
-                Spacer(Modifier.width(12.dp))
-                if (scanning) OutlinedButton(onClick = trainer::stopScan) { Text("Stop") }
+                if (scanning) {
+                    OutlinedButton(onClick = trainer::stopScan) { Text("Stop") }
+                    CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp, color = SawattColors.Accent)
+                }
             }
-            if (scanning) LinearProgressIndicator(Modifier.fillMaxWidth())
-            message?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            message?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp))
+            }
             Text(
                 "Can't find your bike? Start pedalling: many indoor bikes are powered by your pedalling and only advertise while awake.",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = SawattColors.TextSecondary,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
             )
 
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                val connected = setOfNotNull(bike?.device?.address, hr?.device?.address)
-                items(discovered.filter { it.address !in connected }, key = { it.address }) { d ->
-                    DeviceRow(d) {
-                        trainer.connect(d)
-                        // Only remember real devices, to reconnect them automatically.
-                        if (!simulated) {
-                            container.settings.updateApp {
-                                if (d.type == DeviceType.BIKE) it.copy(defaultBike = d.address) else it.copy(defaultHrSensor = d.address)
+            val connected = setOfNotNull(bike?.device?.address, hr?.device?.address)
+            val nearby = discovered.filter { it.address !in connected }
+            if (nearby.isNotEmpty()) {
+                GroupHeader("Nearby")
+                Group {
+                    nearby.forEachIndexed { i, d ->
+                        if (i > 0) GroupDivider()
+                        DeviceRow(d) {
+                            trainer.connect(d)
+                            // Only remember real devices, to reconnect them automatically.
+                            if (!simulated) {
+                                container.settings.updateApp {
+                                    if (d.type == DeviceType.BIKE) it.copy(defaultBike = d.address) else it.copy(defaultHrSensor = d.address)
+                                }
                             }
                         }
                     }
@@ -149,43 +171,30 @@ private fun notificationPermission(): Array<String> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) arrayOf(Manifest.permission.POST_NOTIFICATIONS) else emptyArray()
 
 @Composable
-private fun LinkCard(title: String, link: DeviceLink?, extra: String?, onDisconnect: () -> Unit) {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
-        Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Column(Modifier.weight(1f)) {
-                Text(title.uppercase(), style = MaterialTheme.typography.labelSmall)
-                if (link == null) {
-                    Text("Not connected", style = MaterialTheme.typography.bodyLarge)
-                } else {
-                    val state = when (link.state) {
-                        LinkState.CONNECTING -> "connecting…"
-                        LinkState.CONNECTED -> "connected"
-                        LinkState.RECONNECTING -> "waiting for device…"
-                    }
-                    Text("${link.device.name} — $state", style = MaterialTheme.typography.bodyLarge)
-                    extra?.let { Text(it, style = MaterialTheme.typography.bodySmall) }
-                }
-            }
-            if (link != null) OutlinedButton(onClick = onDisconnect) { Text("Forget") }
-        }
+private fun LinkRow(icon: ImageVector, color: Color, title: String, link: DeviceLink?, extra: String?, onForget: () -> Unit) {
+    val state = when (link?.state) {
+        null -> "Not connected"
+        LinkState.CONNECTING -> "Connecting…"
+        LinkState.CONNECTED -> "Connected"
+        LinkState.RECONNECTING -> "Waiting for the device…"
     }
+    GroupRow(
+        link?.device?.name ?: title,
+        subtitle = listOfNotNull(state, extra).joinToString(" · "),
+        leading = { IconTile(icon, color) },
+        trailing = if (link != null) ({ TextButton(onClick = onForget) { Text("Forget") } }) else null,
+    )
 }
 
 @Composable
 private fun DeviceRow(device: DiscoveredDevice, onClick: () -> Unit) {
-    Card(
-        Modifier.fillMaxWidth().clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
-    ) {
-        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (device.type == DeviceType.BIKE) {
-                Icon(SawattIcons.DirectionsBike, contentDescription = "Bike", tint = MaterialTheme.colorScheme.primary)
-            } else {
-                Icon(Icons.Default.Favorite, contentDescription = "Heart rate", tint = SawattColors.HeartRed)
-            }
-            Spacer(Modifier.width(12.dp))
-            Text(device.name, Modifier.weight(1f))
-            Text("${device.rssi} dBm", style = MaterialTheme.typography.labelSmall)
-        }
-    }
+    val bike = device.type == DeviceType.BIKE
+    GroupRow(
+        device.name,
+        value = "${device.rssi} dBm",
+        leading = {
+            if (bike) IconTile(SawattIcons.DirectionsBike, SawattColors.Text) else IconTile(Icons.Default.Favorite, SawattColors.Heart)
+        },
+        onClick = onClick,
+    )
 }

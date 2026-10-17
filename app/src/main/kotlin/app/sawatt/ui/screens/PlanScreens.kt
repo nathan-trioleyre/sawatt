@@ -1,29 +1,30 @@
 package app.sawatt.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,10 +44,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import app.sawatt.AppContainer
 import app.sawatt.core.ride.RideMath
 import app.sawatt.core.workout.Block
@@ -54,74 +58,67 @@ import app.sawatt.core.workout.PlanStep
 import app.sawatt.core.workout.RepeatSet
 import app.sawatt.core.workout.WorkoutPlan
 import app.sawatt.ui.Routes
+import app.sawatt.ui.components.LargeTitle
+import app.sawatt.ui.components.MetricLabel
+import app.sawatt.ui.components.PlanCard
+import app.sawatt.ui.components.PlanProfile
+import app.sawatt.ui.components.PlayButton
 import app.sawatt.ui.components.SawattIcons
 import app.sawatt.ui.components.SawattTopBar
 import app.sawatt.ui.components.SectionCard
+import app.sawatt.ui.components.planMeta
 import app.sawatt.ui.formatDuration
 import app.sawatt.ui.parseDuration
+import app.sawatt.ui.theme.SawattColors
 import app.sawatt.workout.WorkoutStatus
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.roundToInt
 
 @Composable
-fun PlansScreen(container: AppContainer, nav: NavController) {
+fun PlansScreen(container: AppContainer, nav: NavHostController) {
     val plans by container.plans.plans.collectAsStateWithLifecycle()
     val workout by container.workout.state.collectAsStateWithLifecycle()
-    var toDelete by remember { mutableStateOf<WorkoutPlan?>(null) }
+    val profile by container.settings.profile.collectAsStateWithLifecycle()
+    val ftpW = RideMath.effectiveFtp(profile)
+    val idle = workout.status == WorkoutStatus.IDLE
 
-    Scaffold(
-        topBar = { SawattTopBar("Structured workouts", onBack = { nav.popBackStack() }) },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = { nav.navigate(Routes.planEditor(null)) },
-                icon = { Icon(Icons.Default.Add, null) },
-                text = { Text("New plan") },
-            )
-        },
-    ) { padding ->
-        LazyColumn(
-            Modifier.fillMaxSize().padding(padding).padding(horizontal = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            items(plans, key = { it.id }) { plan ->
-                SectionCard(Modifier.fillMaxWidth()) {
-                    Text(plan.name, style = MaterialTheme.typography.titleMedium)
-                    Text(describe(plan), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Button(
-                            onClick = { nav.navigate(Routes.workout(plan.id)) },
-                            enabled = workout.status == WorkoutStatus.IDLE,
-                        ) {
-                            Icon(Icons.Default.PlayArrow, null)
-                            Text("Ride")
-                        }
-                        Spacer(Modifier.weight(1f))
-                        IconButton(onClick = { nav.navigate(Routes.planEditor(plan.id)) }) { Icon(Icons.Default.Edit, "Edit") }
-                        IconButton(onClick = { toDelete = plan }) { Icon(Icons.Default.Delete, "Delete") }
-                    }
+    LazyColumn(
+        Modifier.fillMaxSize().statusBarsPadding(),
+        contentPadding = PaddingValues(bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            LargeTitle("Workouts", modifier = Modifier.padding(bottom = 6.dp)) {
+                Box(
+                    Modifier.size(44.dp).clip(CircleShape).background(SawattColors.SurfaceHigh)
+                        .clickable(role = Role.Button) { nav.navigate(Routes.planEditor(null)) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "New workout", tint = SawattColors.Accent)
                 }
             }
         }
-    }
-    toDelete?.let { plan ->
-        AlertDialog(
-            onDismissRequest = { toDelete = null },
-            title = { Text("Delete \"${plan.name}\"?") },
-            confirmButton = { TextButton(onClick = { container.plans.delete(plan.id); toDelete = null }) { Text("Delete") } },
-            dismissButton = { TextButton(onClick = { toDelete = null }) { Text("Cancel") } },
-        )
-    }
-}
-
-private fun describe(plan: WorkoutPlan): String {
-    fun b(x: Block) = "${formatDuration(x.durationSec)} @ ${x.targetLabel()}"
-    val steps = plan.steps.joinToString(" → ") { s ->
-        when (s) {
-            is Block -> b(s)
-            is RepeatSet -> "${s.times} × [" + s.blocks.joinToString(" + ") { b(it) } + "]"
+        if (plans.isEmpty()) {
+            item {
+                Text(
+                    "No workout yet. Tap + to build one from blocks of time and power.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = SawattColors.TextSecondary,
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                )
+            }
+        }
+        items(plans, key = { it.id }) { plan ->
+            PlanCard(
+                plan, ftpW,
+                modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth(),
+                onClick = { nav.navigate(Routes.planEditor(plan.id)) },
+                profileHeight = 48.dp,
+            ) {
+                PlayButton("Ride ${plan.name}", onClick = { nav.navigate(Routes.workout(plan.id)) }, enabled = idle)
+            }
         }
     }
-    return "${formatDuration(plan.totalDurationSec)} · $steps"
 }
 
 // ---- Editor ----------------------------------------------------------------------------
@@ -192,6 +189,7 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
         }
     }
     var error by remember { mutableStateOf<String?>(null) }
+    var confirmDelete by remember { mutableStateOf(false) }
 
     fun build(): WorkoutPlan? {
         val built = steps.map { s ->
@@ -211,8 +209,12 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
 
     val preview = build()
     Scaffold(
+        containerColor = SawattColors.Background,
         topBar = {
-            SawattTopBar(if (original == null) "New plan" else "Edit plan", onBack = onDone) {
+            SawattTopBar(if (original == null) "New workout" else "Edit workout", onBack = onDone) {
+                if (original != null) {
+                    IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, "Delete workout") }
+                }
                 TextButton(onClick = {
                     val plan = build()
                     if (plan == null) {
@@ -221,20 +223,23 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
                         container.plans.upsert(plan)
                         onDone()
                     }
-                }) { Text("Save") }
+                }) { Text("Save", fontWeight = FontWeight.Bold) }
             }
         },
     ) { padding ->
         Column(
-            Modifier.fillMaxSize().padding(padding).padding(12.dp).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            OutlinedTextField(name, { name = it }, label = { Text("Plan name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
-            Text(
-                preview?.let { "Total ${formatDuration(it.totalDurationSec)} · ${it.flatten().size} intervals" } ?: "Incomplete plan",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            OutlinedTextField(name, { name = it }, label = { Text("Workout name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            SectionCard(Modifier.fillMaxWidth(), spacing = 10.dp) {
+                Text(
+                    preview?.let(::planMeta) ?: "Incomplete workout",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (preview == null) SawattColors.TextSecondary else SawattColors.Text,
+                )
+                preview?.let { PlanProfile(it.flatten(), ftpW, height = 56.dp) }
+            }
             error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
             steps.forEachIndexed { index, step ->
@@ -273,17 +278,31 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
             )
         }
     }
+    if (confirmDelete && original != null) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text("Delete \"${original.name}\"?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDelete = false
+                    container.plans.delete(original.id)
+                    onDone()
+                }) { Text("Delete") }
+            },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } },
+        )
+    }
 }
 
 @Composable
 private fun StepEditor(step: EditStep, ftpW: Double, onMoveUp: () -> Unit, onMoveDown: () -> Unit, onRemove: () -> Unit) {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)) {
-        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    SectionCard(Modifier.fillMaxWidth(), padding = 12.dp, spacing = 6.dp) {
+        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 when (step) {
-                    is EditStep.Single -> Text("BLOCK", style = MaterialTheme.typography.labelMedium, modifier = Modifier.weight(1f))
+                    is EditStep.Single -> MetricLabel("Block", SawattColors.Accent, Modifier.weight(1f))
                     is EditStep.Repeat -> {
-                        Text("REPEAT", style = MaterialTheme.typography.labelMedium)
+                        MetricLabel("Repeat", SawattColors.Accent)
                         Spacer(Modifier.width(8.dp))
                         OutlinedTextField(
                             step.times, { step.times = it },

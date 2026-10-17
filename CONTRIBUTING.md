@@ -32,7 +32,9 @@ app/    Android app
                    (switches between real and simulated trainer from the "Simulated bike" setting)
         workout/   WorkoutController (1 Hz clock, beeps, saving), WorkoutService (foreground service)
         data/      JSON-file repositories (profile, settings, plans, history)
-        ui/        Compose screens
+        ui/        Compose screens: four tabs (Today, Workouts, History, Me) plus pushed screens
+                   (workout, summary, editor…); theme/ holds the colours and fonts, components/
+                   the shared building blocks
 ```
 
 ## How it works
@@ -165,6 +167,16 @@ The `.github/workflows/ci.yml` workflow runs on every PR and on `main`:
 - Semantic versioning: `vMAJOR.MINOR.PATCH`.
 - A release is a tag on `main`, created **only when the maintainer asks for it**.
 - The changelog is generated from commit messages.
+
+## User interface
+
+- Colours come from `SawattColors` (`ui/theme/Theme.kt`) only: deep ink-blue surfaces and bright
+  pastel accents. Each metric keeps one colour everywhere (power mint, heart rate pink, cadence ice
+  cyan), and the interval average is blue below its target, mint on it, coral above it.
+- Text uses Barlow, big numbers Barlow Condensed. Both are bundled in `res/font` under the SIL Open
+  Font License, shipped in `assets/licenses/barlow-OFL.txt`.
+- Icons come from the Material core set or are bundled as vector drawables (`SawattIcons`); do not
+  add `material-icons-extended`.
 
 ## Architecture rules
 

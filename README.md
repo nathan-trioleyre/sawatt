@@ -23,7 +23,8 @@ block, whether you are on target.
 - A 3-2-1 countdown and a beep mark every transition, so you can keep your eyes off the screen.
 
 ### Know exactly how each interval went
-- Live **interval average power**, green when you are on target, blue below, red above.
+- Live **interval average power**, big in the middle of a ring that fills up as the interval goes
+  by: mint when you are on target, blue below, coral above.
 - Max power, average cadence and average heart rate for the interval.
 - At the end, a summary table with **one row per interval**, saved in your history.
 
@@ -85,7 +86,7 @@ supported yet.
 
 ## Try it without a bike
 
-Turn on **Settings → Simulated bike**: a virtual rider and heart-rate strap connect instantly and
+Turn on **Me → Simulated bike**: a virtual rider and heart-rate strap connect instantly and
 follow your workout's targets. It is the quickest way to discover the app.
 
 ## Getting the app
@@ -97,7 +98,6 @@ attached to each pull request's CI run, or build it yourself: see
 ## Roadmap
 
 - French interface.
-- Direct upload to Strava.
 - Data backup and restore.
 - FTP test, VO2max test, levels and weekly challenges.
 
