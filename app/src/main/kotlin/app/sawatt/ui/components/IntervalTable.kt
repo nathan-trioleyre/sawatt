@@ -17,12 +17,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.sawatt.R
 import app.sawatt.core.workout.IntervalRecord
+import app.sawatt.ui.intervalName
 import app.sawatt.ui.formatDuration
 import app.sawatt.ui.theme.SawattColors
 import app.sawatt.ui.theme.SawattFonts
@@ -44,10 +47,10 @@ fun IntervalTable(intervals: List<IntervalRecord>, ftpW: Double, modifier: Modif
             Modifier.fillMaxWidth().padding(bottom = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            MetricLabel("Interval", modifier = Modifier.weight(1f).padding(start = 12.dp))
-            MetricLabel("Time", modifier = Modifier.width(timeWidth), textAlign = TextAlign.End)
-            MetricLabel("Avg W", modifier = Modifier.width(avgWidth), textAlign = TextAlign.End)
-            MetricLabel("vs target", modifier = Modifier.width(deltaWidth), textAlign = TextAlign.End)
+            MetricLabel(stringResource(R.string.workout_table_interval), modifier = Modifier.weight(1f).padding(start = 12.dp))
+            MetricLabel(stringResource(R.string.workout_table_time), modifier = Modifier.width(timeWidth), textAlign = TextAlign.End)
+            MetricLabel(stringResource(R.string.workout_table_avg_w), modifier = Modifier.width(avgWidth), textAlign = TextAlign.End)
+            MetricLabel(stringResource(R.string.workout_table_vs_target), modifier = Modifier.width(deltaWidth), textAlign = TextAlign.End)
         }
         HorizontalDivider(thickness = 1.dp, color = SawattColors.Hairline)
         intervals.forEach { iv ->
@@ -56,7 +59,7 @@ fun IntervalTable(intervals: List<IntervalRecord>, ftpW: Double, modifier: Modif
         }
         if (intervals.any { it.endedEarly }) {
             Text(
-                "* block ended early (Lap or Finish)",
+                stringResource(R.string.workout_table_ended_early),
                 style = MaterialTheme.typography.bodySmall,
                 color = SawattColors.TextSecondary,
                 modifier = Modifier.padding(top = 6.dp),
@@ -70,10 +73,13 @@ private fun IntervalRow(iv: IntervalRecord, ftpW: Double) {
     val s = iv.stats
     val reference = iv.targetPowerW?.toDouble() ?: s.avgPowerW
     val zone = iv.targetFtpPercent?.toDouble() ?: if (ftpW > 0) reference * 100 / ftpW else 0.0
+    val target = iv.targetPowerW?.let { stringResource(R.string.workout_table_target, it) }
+    val max = stringResource(R.string.workout_table_max, s.maxPowerW)
+    val rpm = stringResource(R.string.workout_unit_rpm)
     val details = buildList {
-        iv.targetPowerW?.let { add("Target $it W" + (iv.targetFtpPercent?.let { p -> " ($p%)" } ?: "")) }
-        add("max ${s.maxPowerW} W")
-        add("${s.avgCadenceRpm.roundToInt()} rpm" + (iv.targetCadenceRpm?.let { " / $it" } ?: ""))
+        target?.let { add(it + (iv.targetFtpPercent?.let { p -> " ($p%)" } ?: "")) }
+        add(max)
+        add("${s.avgCadenceRpm.roundToInt()} $rpm" + (iv.targetCadenceRpm?.let { " / $it" } ?: ""))
         s.avgHeartRate?.let { add("${it.roundToInt()} bpm") }
     }.joinToString(" · ")
 
@@ -84,7 +90,7 @@ private fun IntervalRow(iv: IntervalRecord, ftpW: Double) {
     ) {
         Box(Modifier.width(4.dp).height(32.dp).clip(RoundedCornerShape(2.dp)).background(zoneColor(zone)))
         Column(Modifier.weight(1f)) {
-            Text(iv.name, style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(intervalName(iv.name, iv.kind), style = MaterialTheme.typography.titleSmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(details, style = MaterialTheme.typography.bodySmall, fontSize = 12.sp, color = SawattColors.TextSecondary)
         }
         Text(

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
+import app.sawatt.R
 import app.sawatt.core.export.FitWriter
 import app.sawatt.core.export.TcxWriter
 import app.sawatt.core.workout.WorkoutRecord
@@ -47,7 +48,7 @@ class WorkoutExporter(private val context: Context, private val history: History
             .setType(format.mimeType)
             .putExtra(Intent.EXTRA_STREAM, uri)
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        return Intent.createChooser(send, "Export workout (${format.label})")
+        return Intent.createChooser(send, context.getString(R.string.export_chooser, format.label))
     }
 
     private fun fileName(record: WorkoutRecord, format: ExportFormat): String {

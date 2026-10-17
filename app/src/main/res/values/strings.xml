@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SaWatt</string>
+    <string name="app_name" translatable="false">SaWatt</string>
     <string name="notification_channel_workout">Workout in progress</string>
+    <string name="interval_lap">Lap %1$d</string>
+    <string name="interval_free_ride">Free ride %1$d</string>
 </resources>

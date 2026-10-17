@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Today -->
+    <string name="today_title">Aujourd\'hui</string>
+    <string name="today_bike">Vélo</string>
+    <string name="today_heart_rate">Fréquence cardiaque</string>
+    <string name="today_free_ride">Sortie libre</string>
+    <string name="today_free_ride_hint">Appuie sur Tour pour découper</string>
+    <string name="today_workout_paused">Séance en pause</string>
+    <string name="today_workout_in_progress">Séance en cours</string>
+    <string name="today_start_free_ride">Démarrer une sortie libre</string>
+    <string name="today_back_to_workout">Revenir à la séance</string>
+    <string name="today_your_workouts">Tes séances</string>
+    <string name="today_create">Créer</string>
+    <string name="today_no_plans">Compose des séances d\'intervalles à partir de blocs de durée et de puissance, puis roule-les ici.</string>
+    <string name="today_see_all">Tout voir</string>
+    <string name="today_this_week">Cette semaine</string>
+    <string name="today_history">Historique</string>
+    <string name="today_time">Durée</string>
+    <string name="today_rides">Sorties</string>
+    <string name="today_kcal">kcal</string>
+    <string name="today_not_connected">Non connecté</string>
+    <string name="today_connecting">Connexion…</string>
+    <string name="today_connected">Connecté</string>
+    <string name="today_waiting">En attente…</string>
+    <string name="today_device_status">%1$s : %2$s</string>
+
+    <!-- History -->
+    <string name="history_title">Historique</string>
+    <string name="history_done">Terminé</string>
+    <string name="history_nothing_to_show">Rien à afficher.</string>
+    <string name="history_saved">Enregistrée dans l\'historique</string>
+    <string name="history_delete_this_workout">Supprimer cette séance</string>
+    <string name="history_week">Semaine</string>
+    <string name="history_month">Mois</string>
+    <string name="history_year">Année</string>
+    <string name="history_empty">Aucune séance pour l\'instant. Tes sorties apparaîtront ici, semaine après semaine.</string>
+    <string name="history_previous_period">Période précédente</string>
+    <string name="history_next_period">Période suivante</string>
+    <string name="history_time">Durée</string>
+    <string name="history_distance">Distance</string>
+    <string name="history_avg_w">W moy.</string>
+    <string name="history_kcal">kcal</string>
+    <plurals name="history_workout_count">
+        <item quantity="one">%d séance</item>
+        <item quantity="many">%d séances</item>
+        <item quantity="other">%d séances</item>
+    </plurals>
+    <string name="history_free_ride">Sortie libre</string>
+    <string name="history_delete">Supprimer</string>
+    <string name="history_not_found">Séance introuvable.</string>
+    <string name="history_energy">Énergie</string>
+    <string name="history_avg_power">Puissance moy.</string>
+    <string name="history_max_power">Puissance max</string>
+    <string name="history_avg_cadence">Cadence moy.</string>
+    <string name="history_avg_hr">FC moy.</string>
+    <string name="history_max_hr">FC max</string>
+    <string name="history_power_chart">Puissance · cible en pointillés</string>
+    <string name="history_intervals">Intervalles</string>
+    <string name="history_delete_title">Supprimer la séance ?</string>
+    <string name="history_cancel">Annuler</string>
+
+    <!-- Export -->
+    <string name="export_no_data">Aucune donnée enregistrée à exporter</string>
+    <string name="export_action">Exporter</string>
+    <string name="export_fit">Exporter en FIT (Strava, Garmin Connect…)</string>
+    <string name="export_tcx">Exporter en TCX</string>
+    <string name="export_chooser">Exporter la séance (%1$s)</string>
+</resources>

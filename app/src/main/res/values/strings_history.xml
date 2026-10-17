@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Today -->
+    <string name="today_title">Today</string>
+    <string name="today_bike">Bike</string>
+    <string name="today_heart_rate">Heart rate</string>
+    <string name="today_free_ride">Free ride</string>
+    <string name="today_free_ride_hint">Press Lap to split</string>
+    <string name="today_workout_paused">Workout paused</string>
+    <string name="today_workout_in_progress">Workout in progress</string>
+    <string name="today_start_free_ride">Start a free ride</string>
+    <string name="today_back_to_workout">Back to workout</string>
+    <string name="today_your_workouts">Your workouts</string>
+    <string name="today_create">Create</string>
+    <string name="today_no_plans">Build interval sessions from blocks of time and power, then ride them here.</string>
+    <string name="today_see_all">See all</string>
+    <string name="today_this_week">This week</string>
+    <string name="today_history">History</string>
+    <string name="today_time">Time</string>
+    <string name="today_rides">Rides</string>
+    <string name="today_kcal">kcal</string>
+    <string name="today_not_connected">Not connected</string>
+    <string name="today_connecting">Connecting…</string>
+    <string name="today_connected">Connected</string>
+    <string name="today_waiting">Waiting…</string>
+    <string name="today_device_status">%1$s: %2$s</string>
+
+    <!-- History -->
+    <string name="history_title">History</string>
+    <string name="history_done">Done</string>
+    <string name="history_nothing_to_show">Nothing to show.</string>
+    <string name="history_saved">Saved to history</string>
+    <string name="history_delete_this_workout">Delete this workout</string>
+    <string name="history_week">Week</string>
+    <string name="history_month">Month</string>
+    <string name="history_year">Year</string>
+    <string name="history_empty">No workout yet. Your rides will show up here, week by week.</string>
+    <string name="history_previous_period">Previous period</string>
+    <string name="history_next_period">Next period</string>
+    <string name="history_time">Time</string>
+    <string name="history_distance">Distance</string>
+    <string name="history_avg_w">Avg W</string>
+    <string name="history_kcal">kcal</string>
+    <plurals name="history_workout_count">
+        <item quantity="one">%d workout</item>
+        <item quantity="other">%d workouts</item>
+    </plurals>
+    <string name="history_free_ride">Free ride</string>
+    <string name="history_delete">Delete</string>
+    <string name="history_not_found">Workout not found.</string>
+    <string name="history_energy">Energy</string>
+    <string name="history_avg_power">Avg power</string>
+    <string name="history_max_power">Max power</string>
+    <string name="history_avg_cadence">Avg cadence</string>
+    <string name="history_avg_hr">Avg HR</string>
+    <string name="history_max_hr">Max HR</string>
+    <string name="history_power_chart">Power · target dashed</string>
+    <string name="history_intervals">Intervals</string>
+    <string name="history_delete_title">Delete workout?</string>
+    <string name="history_cancel">Cancel</string>
+
+    <!-- Export -->
+    <string name="export_no_data">No recorded data to export</string>
+    <string name="export_action">Export</string>
+    <string name="export_fit">Export FIT (Strava, Garmin Connect…)</string>
+    <string name="export_tcx">Export TCX</string>
+    <string name="export_chooser">Export workout (%1$s)</string>
+</resources>

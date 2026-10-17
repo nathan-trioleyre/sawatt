@@ -6,6 +6,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.util.Locale
 import kotlin.math.roundToInt
 
 fun formatDuration(totalSec: Int): String {
@@ -39,5 +40,6 @@ fun formatOrDash(v: Double?) = v?.roundToInt()?.toString() ?: "–"
 
 private val dateTimeFormat = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
 
+// The locale is read on each call: the app language can change while the process lives.
 fun formatDateTime(epochMs: Long): String =
-    Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()).format(dateTimeFormat)
+    Instant.ofEpochMilli(epochMs).atZone(ZoneId.systemDefault()).format(dateTimeFormat.withLocale(Locale.getDefault()))

@@ -44,6 +44,7 @@ block, whether you are on target.
 ### Train on your numbers
 - Enter your FTP and max heart rate, or let SaWatt estimate them from your profile.
 - Metric or imperial units.
+- In English or French: SaWatt follows your phone's language, or the one you pick in **Me → Language**.
 
 ### Private by design
 - No account, no ads, no tracking.
@@ -97,7 +98,6 @@ attached to each pull request's CI run, or build it yourself: see
 
 ## Roadmap
 
-- French interface.
 - Data backup and restore.
 - FTP test, VO2max test, levels and weekly challenges.
 

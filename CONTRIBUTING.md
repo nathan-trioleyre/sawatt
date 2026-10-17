@@ -177,6 +177,10 @@ The `.github/workflows/ci.yml` workflow runs on every PR and on `main`:
   Font License, shipped in `assets/licenses/barlow-OFL.txt`.
 - Icons come from the Material core set or are bundled as vector drawables (`SawattIcons`); do not
   add `material-icons-extended`.
+- No user-facing text in Kotlin code: every string lives in `res/values/strings_*.xml` (English,
+  the default) with its French translation in `res/values-fr/`, and counts use `<plurals>`. The
+  French text addresses the user as « tu ». `core` has no access to resources: the English names it
+  generates, such as "Lap 3", are translated when displayed (`ui/IntervalNames.kt`).
 
 ## Architecture rules
 

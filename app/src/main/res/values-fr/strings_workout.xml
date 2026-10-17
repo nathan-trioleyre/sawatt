@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared -->
+    <string name="workout_back">Retour</string>
+    <string name="workout_unit_rpm">tr/min</string>
+    <string name="workout_free_ride">Sortie libre</string>
+
+    <!-- Workout screen -->
+    <string name="workout_press_lap_to_split">Appuie sur Tour pour découper</string>
+    <string name="workout_interval_of_elapsed">Intervalle %1$d sur %2$d · %3$s</string>
+    <string name="workout_interval_elapsed">Intervalle %1$d · %2$s</string>
+    <string name="workout_bike_connected">Vélo connecté</string>
+    <string name="workout_bike_not_connected">Vélo non connecté</string>
+    <string name="workout_hr_connected">Ceinture cardio connectée</string>
+    <string name="workout_hr_not_connected">Ceinture cardio non connectée</string>
+    <string name="workout_discard_title">Abandonner la séance ?</string>
+    <string name="workout_discard_text">Rien ne sera enregistré.</string>
+    <string name="workout_discard">Abandonner</string>
+    <string name="workout_cancel">Annuler</string>
+    <string name="workout_no_bike">Aucun vélo connecté</string>
+    <string name="workout_no_bike_hint">Tu peux démarrer quand même : les données s\'affichent dès que le vélo est connecté.</string>
+    <string name="workout_power">Puissance</string>
+    <string name="workout_cadence">Cadence</string>
+    <string name="workout_heart_rate">FC</string>
+    <string name="workout_ftp">FTP</string>
+    <string name="workout_block_line">%1$s à %2$s</string>
+    <string name="workout_free_ride_hint">Sortie libre : appuie sur Tour à tout moment pour lancer un nouvel intervalle avec ses propres moyennes.</string>
+    <string name="workout_left">restant</string>
+    <string name="workout_elapsed">écoulé</string>
+    <string name="workout_max_interval">Max · intervalle</string>
+    <string name="workout_next">Ensuite  %1$s · %2$s à %3$s</string>
+    <string name="workout_plan_completed">Plan terminé — continue ou appuie sur Terminer.</string>
+    <string name="workout_whole_workout">Séance complète</string>
+    <string name="workout_avg_power">Puissance moy.</string>
+    <string name="workout_distance">Distance</string>
+    <string name="workout_energy">Énergie</string>
+    <string name="workout_completed_intervals">Intervalles terminés</string>
+    <string name="workout_interval_of">Intervalle %1$d sur %2$d</string>
+    <string name="workout_lap_n">Tour %1$d</string>
+    <string name="workout_target">Cible</string>
+    <string name="workout_below_target">W · sous la cible</string>
+    <string name="workout_above_target">W · au-dessus de la cible</string>
+    <string name="workout_on_target">W · dans la cible</string>
+    <string name="workout_interval_avg">Moy. intervalle</string>
+    <string name="workout_paused">EN PAUSE</string>
+    <string name="workout_start">Démarrer</string>
+    <string name="workout_pause">Pause</string>
+    <string name="workout_lap">Tour</string>
+    <string name="workout_finish">Terminer</string>
+    <string name="workout_resume">Reprendre</string>
+
+    <!-- Interval table -->
+    <string name="workout_table_interval">Intervalle</string>
+    <string name="workout_table_time">Temps</string>
+    <string name="workout_table_avg_w">Moy. W</string>
+    <string name="workout_table_vs_target">vs cible</string>
+    <string name="workout_table_ended_early">* bloc terminé avant la fin (Tour ou Terminer)</string>
+    <string name="workout_table_target">Cible %1$d W</string>
+    <string name="workout_table_max">max %1$d W</string>
+
+    <!-- Charts -->
+    <string name="workout_time_in_zones">Temps par zone de puissance</string>
+
+    <!-- Notification -->
+    <string name="workout_notification_running">Séance en cours</string>
+    <string name="workout_notification_left">%1$s restant</string>
+    <string name="workout_notification_text">%1$s · %2$s · moy. %3$d W</string>
+</resources>

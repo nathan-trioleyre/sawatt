@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import app.sawatt.AppContainer
+import app.sawatt.R
 import app.sawatt.core.history.PeriodKind
 import app.sawatt.core.ride.RideMath
 import app.sawatt.core.trainer.DeviceLink
@@ -77,7 +79,7 @@ fun TodayScreen(container: AppContainer, nav: NavHostController) {
     val idle = workout.status == WorkoutStatus.IDLE
 
     Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(bottom = 24.dp)) {
-        LargeTitle("Today", overline = LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.getDefault())))
+        LargeTitle(stringResource(R.string.today_title), overline = LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE d MMMM", Locale.getDefault())))
 
         Row(
             Modifier.padding(start = 12.dp, end = 12.dp, top = 8.dp)
@@ -86,23 +88,23 @@ fun TodayScreen(container: AppContainer, nav: NavHostController) {
                 .padding(8.dp),
             horizontalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            DeviceStatus(SawattIcons.DirectionsBike, SawattColors.TextSecondary, "Bike", bike)
-            DeviceStatus(Icons.Default.Favorite, SawattColors.Heart, "Heart rate", hr)
+            DeviceStatus(SawattIcons.DirectionsBike, SawattColors.TextSecondary, stringResource(R.string.today_bike), bike)
+            DeviceStatus(Icons.Default.Favorite, SawattColors.Heart, stringResource(R.string.today_heart_rate), hr)
         }
 
         SectionCard(Modifier.padding(start = 20.dp, end = 20.dp, top = 14.dp).fillMaxWidth(), padding = 20.dp) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     if (idle) {
-                        Text("Free ride", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                        Text("Press Lap to split", style = MaterialTheme.typography.bodyMedium, color = SawattColors.TextSecondary)
+                        Text(stringResource(R.string.today_free_ride), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.today_free_ride_hint), style = MaterialTheme.typography.bodyMedium, color = SawattColors.TextSecondary)
                     } else {
-                        MetricLabel(if (workout.status == WorkoutStatus.PAUSED) "Workout paused" else "Workout in progress", SawattColors.Pause)
-                        Text(workout.plan?.name ?: "Free ride", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                        MetricLabel(stringResource(if (workout.status == WorkoutStatus.PAUSED) R.string.today_workout_paused else R.string.today_workout_in_progress), SawattColors.Pause)
+                        Text(workout.plan?.name ?: stringResource(R.string.today_free_ride), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
                     }
                 }
                 PlayButton(
-                    if (idle) "Start a free ride" else "Back to workout",
+                    stringResource(if (idle) R.string.today_start_free_ride else R.string.today_back_to_workout),
                     onClick = { nav.navigate(Routes.workout(if (idle) null else workout.plan?.id)) },
                     size = 68.dp,
                 )
@@ -110,15 +112,15 @@ fun TodayScreen(container: AppContainer, nav: NavHostController) {
         }
 
         if (plans.isEmpty()) {
-            SectionHeader("Your workouts", action = "Create") { nav.navigate(Routes.planEditor(null)) }
+            SectionHeader(stringResource(R.string.today_your_workouts), action = stringResource(R.string.today_create)) { nav.navigate(Routes.planEditor(null)) }
             Text(
-                "Build interval sessions from blocks of time and power, then ride them here.",
+                stringResource(R.string.today_no_plans),
                 style = MaterialTheme.typography.bodyMedium,
                 color = SawattColors.TextSecondary,
                 modifier = Modifier.padding(horizontal = 20.dp),
             )
         } else {
-            SectionHeader("Your workouts", action = "See all") { nav.openTab(Routes.PLANS) }
+            SectionHeader(stringResource(R.string.today_your_workouts), action = stringResource(R.string.today_see_all)) { nav.openTab(Routes.PLANS) }
             LazyRow(contentPadding = PaddingValues(horizontal = 20.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 items(plans, key = { it.id }) { plan ->
                     PlanCard(
@@ -130,22 +132,22 @@ fun TodayScreen(container: AppContainer, nav: NavHostController) {
             }
         }
 
-        SectionHeader("This week", action = "History") { nav.openTab(Routes.HISTORY) }
+        SectionHeader(stringResource(R.string.today_this_week), action = stringResource(R.string.today_history)) { nav.openTab(Routes.HISTORY) }
         val week = currentPeriod(PeriodKind.WEEK)
         val weekRecords = recordsIn(records, week)
         Row(Modifier.padding(horizontal = 20.dp).fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Column {
-                    MetricLabel("Time")
+                    MetricLabel(stringResource(R.string.today_time))
                     Metric(formatDuration(weekRecords.sumOf { it.summary.durationSec }), size = 30.sp)
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Column {
-                        MetricLabel("Rides")
+                        MetricLabel(stringResource(R.string.today_rides))
                         Metric(weekRecords.size.toString(), size = 22.sp)
                     }
                     Column {
-                        MetricLabel("kcal")
+                        MetricLabel(stringResource(R.string.today_kcal))
                         Metric(weekRecords.sumOf { it.summary.kcal }.roundToInt().toString(), size = 22.sp)
                     }
                 }
@@ -163,13 +165,14 @@ fun TodayScreen(container: AppContainer, nav: NavHostController) {
 @Composable
 private fun DeviceStatus(icon: ImageVector, tint: Color, title: String, link: DeviceLink?) {
     val (status, color) = when (link?.state) {
-        null -> "Not connected" to SawattColors.Muted
-        LinkState.CONNECTING -> "Connecting…" to SawattColors.Pause
-        LinkState.CONNECTED -> "Connected" to SawattColors.Accent
-        LinkState.RECONNECTING -> "Waiting…" to SawattColors.Pause
+        null -> stringResource(R.string.today_not_connected) to SawattColors.Muted
+        LinkState.CONNECTING -> stringResource(R.string.today_connecting) to SawattColors.Pause
+        LinkState.CONNECTED -> stringResource(R.string.today_connected) to SawattColors.Accent
+        LinkState.RECONNECTING -> stringResource(R.string.today_waiting) to SawattColors.Pause
     }
+    val description = stringResource(R.string.today_device_status, title, status)
     Row(
-        Modifier.semantics(mergeDescendants = true) { contentDescription = "$title: $status" },
+        Modifier.semantics(mergeDescendants = true) { contentDescription = description },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(18.dp))

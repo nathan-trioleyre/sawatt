@@ -30,6 +30,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:configChanges="locale|layoutDirection|screenLayout"
             android:exported="true"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize"

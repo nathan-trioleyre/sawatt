@@ -64,10 +64,10 @@ fun buckets(
     }
 }
 
-/** "12 – 18 October", "October 2026" or "2026". */
+/** "12 – 18 October", "October 2026" or "2026", in the device language. */
 fun periodTitle(key: PeriodKey): String {
     val locale = Locale.getDefault()
-    fun month(m: Month) = m.getDisplayName(TextStyle.FULL, locale).replaceFirstChar { it.titlecase(locale) }
+    fun month(m: Month) = m.getDisplayName(TextStyle.FULL, locale)
     return when (key.kind) {
         PeriodKind.WEEK -> {
             val start = weekStart(key)
@@ -75,7 +75,7 @@ fun periodTitle(key: PeriodKey): String {
             if (start.month == end.month) "${start.dayOfMonth} – ${end.dayOfMonth} ${month(end.month)}"
             else "${start.dayOfMonth} ${month(start.month).take(3)} – ${end.dayOfMonth} ${month(end.month).take(3)}"
         }
-        PeriodKind.MONTH -> "${month(Month.of(key.number))} ${key.year}"
+        PeriodKind.MONTH -> "${month(Month.of(key.number)).replaceFirstChar { it.titlecase(locale) }} ${key.year}"
         PeriodKind.YEAR -> key.year.toString()
     }
 }

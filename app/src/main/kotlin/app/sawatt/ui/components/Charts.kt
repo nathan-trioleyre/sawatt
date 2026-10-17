@@ -17,10 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import app.sawatt.R
 import app.sawatt.ui.Bucket
 import app.sawatt.ui.theme.SawattColors
 
@@ -76,7 +78,7 @@ fun PeriodBars(
 fun ZoneBar(zoneSeconds: List<Int>, modifier: Modifier = Modifier) {
     val total = zoneSeconds.sum().takeIf { it > 0 } ?: return
     Column(modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        MetricLabel("Time in power zones")
+        MetricLabel(stringResource(R.string.workout_time_in_zones))
         Row(Modifier.fillMaxWidth().height(12.dp).clip(RoundedCornerShape(6.dp)), horizontalArrangement = Arrangement.spacedBy(2.dp)) {
             zoneSeconds.forEachIndexed { i, sec ->
                 if (sec > 0) Box(Modifier.weight(sec.toFloat() / total).fillMaxHeight().background(SawattColors.Zones[i]))

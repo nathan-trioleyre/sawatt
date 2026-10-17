@@ -16,6 +16,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import app.sawatt.R
 import app.sawatt.core.workout.WorkoutRecord
 import app.sawatt.data.ExportFormat
 import app.sawatt.data.WorkoutExporter
@@ -25,6 +27,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ExportButton(exporter: WorkoutExporter, record: WorkoutRecord) {
     val context = LocalContext.current
+    val noData = stringResource(R.string.export_no_data)
     val scope = rememberCoroutineScope()
     var menuOpen by remember { mutableStateOf(false) }
 
@@ -33,7 +36,7 @@ fun ExportButton(exporter: WorkoutExporter, record: WorkoutRecord) {
         scope.launch {
             val uri = exporter.export(record, format)
             if (uri == null) {
-                Toast.makeText(context, "No recorded data to export", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, noData, Toast.LENGTH_SHORT).show()
             } else {
                 context.startActivity(exporter.shareIntent(uri, format))
             }
@@ -41,14 +44,14 @@ fun ExportButton(exporter: WorkoutExporter, record: WorkoutRecord) {
     }
 
     Box {
-        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Default.Share, "Export") }
+        IconButton(onClick = { menuOpen = true }) { Icon(Icons.Default.Share, stringResource(R.string.export_action)) }
         DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
             DropdownMenuItem(
-                text = { Text("Export FIT (Strava, Garmin Connect…)") },
+                text = { Text(stringResource(R.string.export_fit)) },
                 onClick = { export(ExportFormat.FIT) },
             )
             DropdownMenuItem(
-                text = { Text("Export TCX") },
+                text = { Text(stringResource(R.string.export_tcx)) },
                 onClick = { export(ExportFormat.TCX) },
             )
         }

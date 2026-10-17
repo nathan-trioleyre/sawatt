@@ -16,10 +16,12 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
-import app.sawatt.SawattApp
+import app.sawatt.AppLanguage
 import app.sawatt.MainActivity
 import app.sawatt.R
+import app.sawatt.SawattApp
 import app.sawatt.ui.formatDuration
+import app.sawatt.ui.intervalName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -35,6 +37,8 @@ import kotlinx.coroutines.launch
 class WorkoutService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
+    override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLanguage.wrap(base))
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -44,7 +48,7 @@ class WorkoutService : Service() {
         )
         try {
             ServiceCompat.startForeground(
-                this, NOTIFICATION_ID, build("Workout running"),
+                this, NOTIFICATION_ID, build(getString(R.string.workout_notification_running)),
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE else 0,
             )
         } catch (e: Exception) {
@@ -57,9 +61,10 @@ class WorkoutService : Service() {
         scope.launch {
             controller.state
                 .map { s ->
-                    val c = s.live?.current ?: return@map "Workout running"
-                    val time = c.remainingSec?.let { "${formatDuration(it)} left" } ?: formatDuration(c.elapsedSec)
-                    "${c.name} · $time · avg ${c.stats.avgPowerW.toInt()} W"
+                    val c = s.live?.current ?: return@map getString(R.string.workout_notification_running)
+                    val time = c.remainingSec?.let { getString(R.string.workout_notification_left, formatDuration(it)) }
+                        ?: formatDuration(c.elapsedSec)
+                    getString(R.string.workout_notification_text, intervalName(this@WorkoutService, c.name, c.kind), time, c.stats.avgPowerW.toInt())
                 }
                 .distinctUntilChanged()
                 .collect { manager.notify(NOTIFICATION_ID, build(it)) }

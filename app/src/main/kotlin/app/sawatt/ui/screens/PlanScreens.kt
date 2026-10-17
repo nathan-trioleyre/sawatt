@@ -45,6 +45,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -52,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import app.sawatt.AppContainer
+import app.sawatt.R
 import app.sawatt.core.ride.RideMath
 import app.sawatt.core.workout.Block
 import app.sawatt.core.workout.PlanStep
@@ -88,20 +90,20 @@ fun PlansScreen(container: AppContainer, nav: NavHostController) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            LargeTitle("Workouts", modifier = Modifier.padding(bottom = 6.dp)) {
+            LargeTitle(stringResource(R.string.plan_title), modifier = Modifier.padding(bottom = 6.dp)) {
                 Box(
                     Modifier.size(44.dp).clip(CircleShape).background(SawattColors.SurfaceHigh)
                         .clickable(role = Role.Button) { nav.navigate(Routes.planEditor(null)) },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "New workout", tint = SawattColors.Accent)
+                    Icon(Icons.Default.Add, contentDescription = stringResource(R.string.plan_new), tint = SawattColors.Accent)
                 }
             }
         }
         if (plans.isEmpty()) {
             item {
                 Text(
-                    "No workout yet. Tap + to build one from blocks of time and power.",
+                    stringResource(R.string.plan_empty),
                     style = MaterialTheme.typography.bodyMedium,
                     color = SawattColors.TextSecondary,
                     modifier = Modifier.padding(horizontal = 20.dp),
@@ -115,7 +117,7 @@ fun PlansScreen(container: AppContainer, nav: NavHostController) {
                 onClick = { nav.navigate(Routes.planEditor(plan.id)) },
                 profileHeight = 48.dp,
             ) {
-                PlayButton("Ride ${plan.name}", onClick = { nav.navigate(Routes.workout(plan.id)) }, enabled = idle)
+                PlayButton(stringResource(R.string.plan_ride, plan.name), onClick = { nav.navigate(Routes.workout(plan.id)) }, enabled = idle)
             }
         }
     }
@@ -138,11 +140,11 @@ private class EditBlock(name: String, duration: String, power: String, cadence: 
 
     val powerValue: Int? get() = power.trim().toIntOrNull()?.takeIf { it in if (percent) PERCENT_RANGE else WATTS_RANGE }
 
-    fun toBlock(): Block? {
+    fun toBlock(defaultName: String): Block? {
         val d = parseDuration(duration) ?: return null
         val p = powerValue ?: return null
         val c = cadence.trim().takeIf { it.isNotEmpty() }?.let { it.toIntOrNull()?.takeIf { v -> v in 1..200 } ?: return null }
-        val n = name.trim().ifEmpty { "Interval" }
+        val n = name.trim().ifEmpty { defaultName }
         return if (percent) Block(n, d, targetCadenceRpm = c, targetFtpPercent = p) else Block(n, d, p, c)
     }
 
@@ -158,7 +160,7 @@ private class EditBlock(name: String, duration: String, power: String, cadence: 
             percent = b.targetFtpPercent != null,
         )
 
-        fun blank(name: String = "Interval") = EditBlock(name, "5:00", "150", "")
+        fun blank(name: String) = EditBlock(name, "5:00", "150", "")
     }
 }
 
@@ -181,11 +183,18 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
     val profile by container.settings.profile.collectAsStateWithLifecycle()
     val ftpW = RideMath.effectiveFtp(profile)
     val original = remember(planId) { planId?.let(container.plans::get) }
-    var name by remember { mutableStateOf(original?.name ?: "New workout") }
+    val newWorkoutName = stringResource(R.string.plan_new)
+    val warmUpName = stringResource(R.string.plan_block_warm_up)
+    val intervalName = stringResource(R.string.plan_block_interval)
+    val effortName = stringResource(R.string.plan_block_effort)
+    val recoveryName = stringResource(R.string.plan_block_recovery)
+    val defaultPlanName = stringResource(R.string.plan_default_name)
+    val invalidMessage = stringResource(R.string.plan_invalid)
+    var name by remember { mutableStateOf(original?.name ?: newWorkoutName) }
     val steps = remember {
         mutableStateListOf<EditStep>().apply {
             if (original != null) addAll(original.steps.map { it.toEdit() })
-            else add(EditStep.Single(EditBlock.blank("Warm-up")))
+            else add(EditStep.Single(EditBlock.blank(warmUpName)))
         }
     }
     var error by remember { mutableStateOf<String?>(null) }
@@ -194,36 +203,36 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
     fun build(): WorkoutPlan? {
         val built = steps.map { s ->
             when (s) {
-                is EditStep.Single -> s.block.toBlock() ?: return null
+                is EditStep.Single -> s.block.toBlock(intervalName) ?: return null
                 is EditStep.Repeat -> {
                     val times = s.times.trim().toIntOrNull()?.takeIf { it in 1..50 } ?: return null
-                    val blocks = s.blocks.map { it.toBlock() ?: return null }
+                    val blocks = s.blocks.map { it.toBlock(intervalName) ?: return null }
                     if (blocks.isEmpty()) return null
                     RepeatSet(times, blocks)
                 }
             }
         }
         if (built.isEmpty()) return null
-        return WorkoutPlan(id = original?.id ?: java.util.UUID.randomUUID().toString(), name = name.trim().ifEmpty { "Workout" }, steps = built)
+        return WorkoutPlan(id = original?.id ?: java.util.UUID.randomUUID().toString(), name = name.trim().ifEmpty { defaultPlanName }, steps = built)
     }
 
     val preview = build()
     Scaffold(
         containerColor = SawattColors.Background,
         topBar = {
-            SawattTopBar(if (original == null) "New workout" else "Edit workout", onBack = onDone) {
+            SawattTopBar(stringResource(if (original == null) R.string.plan_new else R.string.plan_edit), onBack = onDone) {
                 if (original != null) {
-                    IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, "Delete workout") }
+                    IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Default.Delete, stringResource(R.string.plan_delete)) }
                 }
                 TextButton(onClick = {
                     val plan = build()
                     if (plan == null) {
-                        error = "Check the highlighted values: duration like 15 or 15:00, power in W, optional cadence."
+                        error = invalidMessage
                     } else {
                         container.plans.upsert(plan)
                         onDone()
                     }
-                }) { Text("Save", fontWeight = FontWeight.Bold) }
+                }) { Text(stringResource(R.string.plan_save), fontWeight = FontWeight.Bold) }
             }
         },
     ) { padding ->
@@ -231,10 +240,10 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
             Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            OutlinedTextField(name, { name = it }, label = { Text("Workout name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.plan_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
             SectionCard(Modifier.fillMaxWidth(), spacing = 10.dp) {
                 Text(
-                    preview?.let(::planMeta) ?: "Incomplete workout",
+                    preview?.let { planMeta(it) } ?: stringResource(R.string.plan_incomplete),
                     style = MaterialTheme.typography.titleSmall,
                     color = if (preview == null) SawattColors.TextSecondary else SawattColors.Text,
                 )
@@ -255,24 +264,24 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { steps.add(EditStep.Single(EditBlock.blank())) }) {
+                OutlinedButton(onClick = { steps.add(EditStep.Single(EditBlock.blank(intervalName))) }) {
                     Icon(Icons.Default.Add, null)
-                    Text("Block")
+                    Text(stringResource(R.string.plan_block))
                 }
                 OutlinedButton(onClick = {
                     steps.add(
                         EditStep.Repeat(
                             "3",
-                            mutableStateListOf(EditBlock("Effort", "15:00", "250", ""), EditBlock("Recovery", "5:00", "120", "")),
+                            mutableStateListOf(EditBlock(effortName, "15:00", "250", ""), EditBlock(recoveryName, "5:00", "120", "")),
                         ),
                     )
                 }) {
                     Icon(SawattIcons.Repeat, null)
-                    Text("Repeat set")
+                    Text(stringResource(R.string.plan_repeat_set))
                 }
             }
             Text(
-                "Durations: \"15\" = 15 min, \"15:30\" = 15 min 30 s. Cadence is optional.",
+                stringResource(R.string.plan_duration_help),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -281,28 +290,29 @@ fun PlanEditorScreen(container: AppContainer, planId: String?, onDone: () -> Uni
     if (confirmDelete && original != null) {
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
-            title = { Text("Delete \"${original.name}\"?") },
+            title = { Text(stringResource(R.string.plan_delete_confirm, original.name)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmDelete = false
                     container.plans.delete(original.id)
                     onDone()
-                }) { Text("Delete") }
+                }) { Text(stringResource(R.string.plan_delete_action)) }
             },
-            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancel") } },
+            dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.plan_cancel)) } },
         )
     }
 }
 
 @Composable
 private fun StepEditor(step: EditStep, ftpW: Double, onMoveUp: () -> Unit, onMoveDown: () -> Unit, onRemove: () -> Unit) {
+    val intervalName = stringResource(R.string.plan_block_interval)
     SectionCard(Modifier.fillMaxWidth(), padding = 12.dp, spacing = 6.dp) {
         Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 when (step) {
-                    is EditStep.Single -> MetricLabel("Block", SawattColors.Accent, Modifier.weight(1f))
+                    is EditStep.Single -> MetricLabel(stringResource(R.string.plan_block), SawattColors.Accent, Modifier.weight(1f))
                     is EditStep.Repeat -> {
-                        MetricLabel("Repeat", SawattColors.Accent)
+                        MetricLabel(stringResource(R.string.plan_repeat), SawattColors.Accent)
                         Spacer(Modifier.width(8.dp))
                         OutlinedTextField(
                             step.times, { step.times = it },
@@ -315,9 +325,9 @@ private fun StepEditor(step: EditStep, ftpW: Double, onMoveUp: () -> Unit, onMov
                         Spacer(Modifier.weight(1f))
                     }
                 }
-                IconButton(onClick = onMoveUp) { Icon(SawattIcons.ArrowUpward, "Move up") }
-                IconButton(onClick = onMoveDown) { Icon(SawattIcons.ArrowDownward, "Move down") }
-                IconButton(onClick = onRemove) { Icon(Icons.Default.Delete, "Remove") }
+                IconButton(onClick = onMoveUp) { Icon(SawattIcons.ArrowUpward, stringResource(R.string.plan_move_up)) }
+                IconButton(onClick = onMoveDown) { Icon(SawattIcons.ArrowDownward, stringResource(R.string.plan_move_down)) }
+                IconButton(onClick = onRemove) { Icon(Icons.Default.Delete, stringResource(R.string.plan_remove)) }
             }
             when (step) {
                 is EditStep.Single -> BlockFields(step.block, ftpW)
@@ -326,13 +336,13 @@ private fun StepEditor(step: EditStep, ftpW: Double, onMoveUp: () -> Unit, onMov
                         key(b.id) {
                             Row(verticalAlignment = Alignment.Top) {
                                 Column(Modifier.weight(1f)) { BlockFields(b, ftpW) }
-                                IconButton(onClick = { step.blocks.removeAt(i) }) { Icon(Icons.Default.Close, "Remove block") }
+                                IconButton(onClick = { step.blocks.removeAt(i) }) { Icon(Icons.Default.Close, stringResource(R.string.plan_remove_block)) }
                             }
                         }
                     }
-                    TextButton(onClick = { step.blocks.add(EditBlock.blank()) }) {
+                    TextButton(onClick = { step.blocks.add(EditBlock.blank(intervalName)) }) {
                         Icon(Icons.Default.Add, null)
-                        Text("Block in set")
+                        Text(stringResource(R.string.plan_block_in_set))
                     }
                 }
             }
@@ -343,18 +353,18 @@ private fun StepEditor(step: EditStep, ftpW: Double, onMoveUp: () -> Unit, onMov
 @Composable
 private fun BlockFields(b: EditBlock, ftpW: Double) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        OutlinedTextField(b.name, { b.name = it }, label = { Text("Name") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(b.name, { b.name = it }, label = { Text(stringResource(R.string.plan_block_name)) }, singleLine = true, modifier = Modifier.fillMaxWidth())
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             OutlinedTextField(
                 b.duration, { b.duration = it },
-                label = { Text("Duration") },
+                label = { Text(stringResource(R.string.plan_duration)) },
                 singleLine = true,
                 isError = parseDuration(b.duration) == null,
                 modifier = Modifier.weight(1.1f),
             )
             OutlinedTextField(
                 b.power, { b.power = it },
-                label = { Text(if (b.percent) "% FTP" else "Power W") },
+                label = { Text(stringResource(if (b.percent) R.string.plan_power_percent else R.string.plan_power_watts)) },
                 singleLine = true,
                 isError = b.powerValue == null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -362,8 +372,8 @@ private fun BlockFields(b: EditBlock, ftpW: Double) {
             )
             OutlinedTextField(
                 b.cadence, { b.cadence = it },
-                label = { Text("rpm") },
-                placeholder = { Text("opt.") },
+                label = { Text(stringResource(R.string.plan_cadence)) },
+                placeholder = { Text(stringResource(R.string.plan_optional)) },
                 singleLine = true,
                 isError = b.cadence.isNotBlank() && b.cadence.trim().toIntOrNull()?.let { it in 1..200 } != true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -374,13 +384,13 @@ private fun BlockFields(b: EditBlock, ftpW: Double) {
             FilterChip(
                 selected = b.percent,
                 onClick = { b.percent = !b.percent },
-                label = { Text("% of FTP") },
+                label = { Text(stringResource(R.string.plan_percent_of_ftp)) },
             )
             val pct = b.powerValue
             if (b.percent && pct != null) {
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "≈ ${(ftpW * pct / 100).roundToInt()} W with your FTP of ${ftpW.roundToInt()} W",
+                    stringResource(R.string.plan_percent_hint, (ftpW * pct / 100).roundToInt(), ftpW.roundToInt()),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

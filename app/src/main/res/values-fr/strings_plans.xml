@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="plan_title">Séances</string>
+    <string name="plan_new">Nouvelle séance</string>
+    <string name="plan_edit">Modifier la séance</string>
+    <string name="plan_default_name">Séance</string>
+    <string name="plan_empty">Aucune séance pour l\'instant. Touche + pour en créer une à partir de blocs de durée et de puissance.</string>
+    <string name="plan_ride">Lancer %1$s</string>
+    <plurals name="plan_meta">
+        <item quantity="one">%1$s · %2$d intervalle</item>
+        <item quantity="many">%1$s · %2$d intervalles</item>
+        <item quantity="other">%1$s · %2$d intervalles</item>
+    </plurals>
+    <string name="plan_incomplete">Séance incomplète</string>
+    <string name="plan_invalid">Vérifie les valeurs en rouge : durée comme 15 ou 15:00, puissance en W, cadence facultative.</string>
+    <string name="plan_save">Enregistrer</string>
+    <string name="plan_delete">Supprimer la séance</string>
+    <string name="plan_delete_confirm">Supprimer « %1$s » ?</string>
+    <string name="plan_delete_action">Supprimer</string>
+    <string name="plan_cancel">Annuler</string>
+    <string name="plan_name">Nom de la séance</string>
+    <string name="plan_block">Bloc</string>
+    <string name="plan_repeat">Répéter</string>
+    <string name="plan_repeat_set">Série répétée</string>
+    <string name="plan_block_in_set">Bloc dans la série</string>
+    <string name="plan_duration_help">Durées : « 15 » = 15 min, « 15:30 » = 15 min 30 s. La cadence est facultative.</string>
+    <string name="plan_move_up">Monter</string>
+    <string name="plan_move_down">Descendre</string>
+    <string name="plan_remove">Retirer</string>
+    <string name="plan_remove_block">Retirer le bloc</string>
+    <string name="plan_block_name">Nom</string>
+    <string name="plan_duration">Durée</string>
+    <string name="plan_power_percent">% FTP</string>
+    <string name="plan_power_watts">Puissance W</string>
+    <string name="plan_cadence">tr/min</string>
+    <string name="plan_optional">facult.</string>
+    <string name="plan_percent_of_ftp">% de la FTP</string>
+    <string name="plan_percent_hint">≈ %1$d W avec ta FTP de %2$d W</string>
+    <string name="plan_block_warm_up">Échauffement</string>
+    <string name="plan_block_interval">Intervalle</string>
+    <string name="plan_block_effort">Effort</string>
+    <string name="plan_block_recovery">Récup</string>
+</resources>

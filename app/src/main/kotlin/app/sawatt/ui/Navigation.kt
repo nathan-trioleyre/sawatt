@@ -1,5 +1,6 @@
 package app.sawatt.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -26,6 +28,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.sawatt.AppContainer
+import app.sawatt.R
 import app.sawatt.ui.components.SawattIcons
 import app.sawatt.ui.screens.DevicesScreen
 import app.sawatt.ui.screens.HistoryDetailScreen
@@ -59,13 +62,13 @@ object Routes {
     fun historyDetail(id: String) = "history/$id"
 }
 
-private class Tab(val route: String, val label: String, val icon: @Composable () -> ImageVector)
+private class Tab(val route: String, @StringRes val label: Int, val icon: @Composable () -> ImageVector)
 
 private val tabs = listOf(
-    Tab(Routes.TODAY, "Today") { SawattIcons.TabToday },
-    Tab(Routes.PLANS, "Workouts") { SawattIcons.TabWorkouts },
-    Tab(Routes.HISTORY, "History") { SawattIcons.TabHistory },
-    Tab(Routes.ME, "Me") { SawattIcons.TabMe },
+    Tab(Routes.TODAY, R.string.nav_today) { SawattIcons.TabToday },
+    Tab(Routes.PLANS, R.string.nav_workouts) { SawattIcons.TabWorkouts },
+    Tab(Routes.HISTORY, R.string.nav_history) { SawattIcons.TabHistory },
+    Tab(Routes.ME, R.string.nav_me) { SawattIcons.TabMe },
 )
 
 /** Switches tab the usual way: one back stack entry per tab, each keeping its state. */
@@ -131,7 +134,7 @@ private fun TabBar(current: String?, onSelect: (String) -> Unit) {
                     selected = tab.route == current,
                     onClick = { onSelect(tab.route) },
                     icon = { Icon(tab.icon(), contentDescription = null) },
-                    label = { Text(tab.label, style = MaterialTheme.typography.labelSmall, fontSize = 11.sp, letterSpacing = 0.sp) },
+                    label = { Text(stringResource(tab.label), style = MaterialTheme.typography.labelSmall, fontSize = 11.sp, letterSpacing = 0.sp) },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = SawattColors.Accent,
                         selectedTextColor = SawattColors.Accent,

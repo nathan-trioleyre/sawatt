@@ -31,6 +31,10 @@ android {
     buildFeatures {
         compose = true
     }
+    androidResources {
+        // Lists English and French in the system's per-app language settings (Android 13+).
+        generateLocaleConfig = true
+    }
 }
 
 androidComponents {
